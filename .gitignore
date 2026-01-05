@@ -1,0 +1,12 @@
+###################
+## Script Buddha ##
+###################
+
+## Developer
+.dev/
+.temp/
+.vscode/
+
+## Java
+target/
+test/
