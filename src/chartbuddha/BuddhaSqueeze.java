@@ -33,7 +33,7 @@ public class BuddhaSqueeze extends Study {
 
     // Standard deviation values for Bollinger Bands and Keltner Channels
     enum Values {
-        OSC, LINREG, SQUEEZE_COUNT, SQUEEZE_MARKER
+        OSC, LINREG, SQUEEZE_COUNT, SQUEEZE_MARKER, ATR_EMA, ATR_VALUE
     }
 
     // Buddha Bands color palette
@@ -85,7 +85,8 @@ public class BuddhaSqueeze extends Study {
                 return null;
             }
 
-            double x = i;
+            // X-axis: oldest bar (i=period-1) has x=0, newest bar (i=0) has x=period-1
+            double x = period - 1 - i;
             sumX += x;
             sumY += y;
             sumXY += x * y;
@@ -201,14 +202,6 @@ public class BuddhaSqueeze extends Study {
         squeeze.addRow(new ColorDescriptor(COLOR_SQUEEZE, "Squeeze Color", CLR_SQUEEZE));
         squeeze.addRow(new ColorDescriptor(COLOR_GUIDE, "No Squeeze Color", CLR_GUIDE));
 
-        // var markers = tab.addGroup(get("Squeeze Markers"));
-        // markers.addRow(new MarkerDescriptor(COLOR_SQUEEZE, get("UP_MARKER"), Enums.MarkerType.CIRCLE,
-        //         Enums.Size.VERY_LARGE, CLR_SQUEEZE, Color.BLACK, true, true));
-        //  markers.addRow(new MarkerDescriptor(COLOR_SQUEEZE, get("DOWN_MARKER"), Enums.MarkerType.TRIANGLE,
-        //          Enums.Size.VERY_LARGE, CLR_SQUEEZE, Color.BLACK, true, true));
-        //  var indicator = tab.addGroup("Indicator");
-        //  indicator.addRow(new IndicatorDescriptor(Inputs.IND, "Indicator", CLR_GUIDE, null, false, true, true));
-        // Quick Settings (Tool Bar and Popup Editor)
         sd.addQuickSettings(INPUT, PERIOD, BB_STD, KC_STD);
         sd.addQuickSettings(COLOR_SQUEEZE, COLOR_POS_INC, COLOR_POS_DEC, COLOR_NEG_INC, COLOR_NEG_DEC);
 
@@ -233,10 +226,37 @@ public class BuddhaSqueeze extends Study {
     @Override
     protected void calculate(int index, DataContext ctx) {
         int period = getSettings().getInteger(PERIOD);
-        double stdBB = getSettings().getDouble(BB_STD);
-        double stdKC = getSettings().getDouble(KC_STD);
         Object source = getSettings().getInput(INPUT, Enums.BarInput.CLOSE);
         var series = ctx.getDataSeries();
+
+        // Regime-based volatility adjustment
+        double stdBB;
+        double stdKC;
+
+        // Calculate ATR and its 50-period EMA for volatility regime detection
+        Double currentAtr = atr(series, index, period);
+        if (currentAtr != null) {
+            // Store ATR value in series for EMA calculation
+            series.setDouble(index, Values.ATR_VALUE, currentAtr);
+
+            // Calculate EMA of ATR using stored values
+            Double atrEma = series.ma(Enums.MAMethod.EMA, index, 50, Values.ATR_VALUE);
+
+            // Determine volatility regime and set multipliers
+            if (atrEma != null && currentAtr > atrEma) {
+                // High volatility regime
+                stdBB = 2.2;
+                stdKC = 1.7;
+            } else {
+                // Low volatility regime
+                stdBB = 1.8;
+                stdKC = 1.3;
+            }
+        } else {
+            // Fallback to user settings if ATR calculation fails
+            stdBB = getSettings().getDouble(BB_STD);
+            stdKC = getSettings().getDouble(KC_STD);
+        }
 
         // Always calculate and store the linreg input (close - oscBase/2) for every bar
         // This is needed so linreg can look back at historical values
@@ -273,11 +293,12 @@ public class BuddhaSqueeze extends Study {
 
         Double prevOsc = series.getDouble(index - 1, Values.OSC);
         if (prevOsc != null) {
-            boolean increasing = (osc * 100) > prevOsc;
+            Double currentOsc = series.getDouble(index, Values.OSC);
+            boolean increasing = currentOsc > prevOsc;
             if (increasing) {
-                series.setBarColor(index, Values.OSC, osc > 0 ? color_pos_Inc : color_neg_Inc);
+                series.setBarColor(index, Values.OSC, currentOsc > 0 ? color_pos_Inc : color_neg_Dec);
             } else {
-                series.setBarColor(index, Values.OSC, osc > 0 ? color_pos_Dec : color_neg_Dec);
+                series.setBarColor(index, Values.OSC, currentOsc > 0 ? color_pos_Dec : color_neg_Inc);
             }
         }
 
