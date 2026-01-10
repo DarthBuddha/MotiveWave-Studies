@@ -18,11 +18,6 @@ import com.motivewave.platform.sdk.draw.Marker;
 import com.motivewave.platform.sdk.study.Study;
 import com.motivewave.platform.sdk.study.StudyHeader;
 
-/**
- * Moving Average Cross. This study consists of two moving averages: Fast MA
- * (shorter period), Slow MA. Signals are generated when the Fast MA moves above
- * or below the Slow MA. Markers are also displayed where these crosses occur.
- */
 @StudyHeader(
         namespace = "com.chartbuddha",
         id = "SMABANDS",
@@ -32,6 +27,7 @@ import com.motivewave.platform.sdk.study.StudyHeader;
         menu = "Script Buddha",
         overlay = true,
         signals = true)
+
 public class SmaBands extends Study {
 
     enum Values {
@@ -48,7 +44,7 @@ public class SmaBands extends Study {
         CROSS_ABOVE_D, CROSS_BELOW_D
     };
 
-    // Buddha Bands color palette
+    // SMA Bands color palette
     private static final Color CLR_A_SLOW = new Color(120, 123, 134, 255);
     private static final Color CLR_A_FAST = new Color(120, 123, 134, 255);
     private static final Color CLR_A_TOP_FILL = new Color(120, 123, 134, 120);

@@ -6,6 +6,8 @@
 .dev/
 .temp/
 .vscode/
+jar/
+lib/
 
 ## Java
 target/

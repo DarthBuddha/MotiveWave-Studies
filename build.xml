@@ -39,6 +39,13 @@
     <fileset dir="${lib.dir}" includes="**/*.jar"/>
     <pathelement path="${bin.dir}"/>
   </path>
+  <!-- Class path for JavaFx. -->
+  <path id="javafx.classpath">
+  <fileset dir="C:/Java/javafx-sdk-25.0.1/lib">
+    <include name="*.jar"/>
+  </fileset>
+</path>
+
 
   <!-- Compiles the source putting the generated class files in the 'classes' subdirectory. -->
   <target name="compile" depends="clean">
