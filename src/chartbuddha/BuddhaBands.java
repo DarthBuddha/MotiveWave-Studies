@@ -159,8 +159,9 @@ public class BuddhaBands extends Study {
     private static final String IND_D2 = "ind_d2";
 
     @Override
+    /* === INITIALIZE === */
     public void initialize(Defaults defaults) {
-        // User Settings
+        // === SETTING DESCRIPTOR ===
         var sd = createSD();
 
         // Tab - A
@@ -282,7 +283,7 @@ public class BuddhaBands extends Study {
         grp.addRow(new MarkerDescriptor(UP_MARKER_D, "Up Marker D", Enums.MarkerType.TRIANGLE, Enums.Size.SMALL, CLR_UP, defaults.getLineColor(), false, true));
         grp.addRow(new MarkerDescriptor(DOWN_MARKER_D, "Down Marker D", Enums.MarkerType.TRIANGLE, Enums.Size.SMALL, CLR_DOWN, defaults.getLineColor(), false, true));
 
-        // Runtime Settings
+        // === RUNTIME DESCRIPTOR ===
         var desc = createRD();
         desc.setLabelSettings(
                 INPUT_A1, METHOD_A1, PERIOD_A1,
