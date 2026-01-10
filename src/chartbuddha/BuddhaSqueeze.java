@@ -171,8 +171,9 @@ public class BuddhaSqueeze extends Study {
         double kcWidth = stdKC * atrValue;
         double bbWidth = stdBB * stdevValue;
 
-        // Squeeze occurs when BB width is less than KC width
-        boolean squeeze = kcWidth != 0 ? (bbWidth / kcWidth) < 1 : false;
+        // Squeeze occurs when BB width is less than or very close to KC width
+        // Using 1.08 threshold for fine-tuned sensitivity (8% tolerance)
+        boolean squeeze = kcWidth != 0 ? (bbWidth / kcWidth) < 1.08 : false;
         return squeeze;
     }
 
