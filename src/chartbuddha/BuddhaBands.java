@@ -1,4 +1,4 @@
-package script_buddha;
+package chartbuddha;
 
 import java.awt.Color;
 
@@ -20,15 +20,15 @@ import com.motivewave.platform.sdk.study.StudyHeader;
 
 @StudyHeader(
         namespace = "com.chartbuddha",
-        id = "SMABANDS",
-        name = "SMA Bands",
-        label = "SMA Bands",
+        id = "BUDDHA_BANDS",
+        name = "Buddha Bands",
+        label = "Buddha Bands",
         desc = "Displays a signal arrow when two moving averages (fast and slow) cross.",
-        menu = "Script Buddha",
+        menu = "Chart Buddha",
         overlay = true,
         signals = true)
 
-public class SmaBands extends Study {
+public class BuddhaBands extends Study {
 
     enum Values {
         FAST_A, SLOW_A,

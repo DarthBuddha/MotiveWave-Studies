@@ -1,4 +1,4 @@
-package script_buddha;
+package chartbuddha;
 
 import java.awt.Color;
 
@@ -22,7 +22,7 @@ import com.motivewave.platform.sdk.study.StudyHeader;
         id = "BuddhaSqueeze",
         name = "Buddha Squeeze",
         desc = "The Buddha Squeeze highlights volatility compression and signals when the market is poised to break out with directional momentum.",
-        menu = "Script Buddha",
+        menu = "Chart Buddha",
         signals = false,
         overlay = false,
         studyOverlay = true
