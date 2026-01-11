@@ -1,0 +1,64 @@
+{
+    "java.configuration.runtimes": [
+        {
+            "name": "JavaSE-25",
+            "path": "C:\\Program Files\\Java\\jdk-25",
+            "default": true
+        }
+    ],
+    "java.jdt.ls.java.home": "C:\\Program Files\\Java\\jdk-25",
+    "editor.renderWhitespace": "all",
+        "editor.rulers": [
+            {
+                "column": 0,
+                "color": "#F0F8FF20"
+            },
+            {
+                "column": 120,
+                "color": "#F0F8FF20"
+            },
+            {
+                "column": 140,
+                "color": "#C8081550"
+            }
+        ],
+        "editor.showFoldingControls": "always",
+        "cSpell.words": [
+            "BARSIZE",
+        "Bollinger",
+        "chartbuddha",
+        "classpathentry",
+        "colour",
+        "ctxt",
+        "debuglevel",
+        "destdir",
+        "destfile",
+        "downmarker",
+        "fileset",
+        "includeantruntime",
+        "javabuilder",
+        "javac",
+        "javafx",
+        "javanature",
+        "Keltner",
+        "linreg",
+        "lookback",
+        "MACD",
+        "MACROSS",
+        "motivewave",
+        "mult",
+        "mwave",
+        "OCHG",
+        "openjfx",
+        "pathelement",
+        "pomderived",
+        "refid",
+        "scriptbuddha",
+        "SMABANDS",
+        "SMMA",
+        "stdev",
+        "todir",
+        "UPMARKER",
+        "Xlint"
+    ]
+}

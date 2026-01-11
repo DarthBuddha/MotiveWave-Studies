@@ -3,9 +3,9 @@
 ###################
 
 ## Developer
-.dev/
-.temp/
-.vscode/
+.developer/
+
+
 
 # Compiled source #
 bin/

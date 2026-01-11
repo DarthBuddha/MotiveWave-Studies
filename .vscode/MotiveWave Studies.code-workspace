@@ -1,0 +1,15 @@
+{
+    "folders": [
+        {
+        "path": ".."
+        }
+    ],
+    "settings": {
+        "maven.terminal.useJavaHome": true,
+        "java.dependency.syncWithFolderExplorer": false,
+        "java.configuration.updateBuildConfiguration": "automatic",
+        "java.project.explorer.showNonJavaResources": false,
+        "prettier-plugin-java-vscode.enabled": true,
+        "prettier-plugin-java-vscode.prettierConfigPath": "${workspaceFolder}/.prettierrc"
+    }
+}

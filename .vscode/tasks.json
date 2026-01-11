@@ -1,0 +1,11 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "MotiveWave: Build Jar",
+            "type": "shell",
+            "command": "ant deploy_jar",
+            "group": "build"
+        }
+    ]
+}
