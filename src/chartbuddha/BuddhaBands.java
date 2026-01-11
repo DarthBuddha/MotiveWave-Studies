@@ -1,7 +1,5 @@
 package chartbuddha;
 
-import java.awt.Color;
-
 import com.motivewave.platform.sdk.common.Coordinate;
 import com.motivewave.platform.sdk.common.DataContext;
 import com.motivewave.platform.sdk.common.Defaults;
@@ -17,32 +15,41 @@ import com.motivewave.platform.sdk.common.desc.ValueDescriptor;
 import com.motivewave.platform.sdk.draw.Marker;
 import com.motivewave.platform.sdk.study.Study;
 import com.motivewave.platform.sdk.study.StudyHeader;
+import java.awt.Color;
 
 @StudyHeader(
-        namespace = "com.chartbuddha",
-        id = "BUDDHA_BANDS",
-        name = "Buddha Bands",
-        label = "Buddha Bands",
-        desc = "Displays a signal arrow when two moving averages (fast and slow) cross.",
-        menu = "Chart Buddha",
-        overlay = true,
-        signals = true)
-
+    namespace = "com.chartbuddha",
+    id = "BUDDHA_BANDS",
+    name = "Buddha Bands",
+    label = "Buddha Bands",
+    desc = "Displays a signal arrow when two moving averages (fast and slow) cross.",
+    menu = "Chart Buddha",
+    overlay = true,
+    signals = true
+)
 public class BuddhaBands extends Study {
 
     enum Values {
-        FAST_A, SLOW_A,
-        FAST_B, SLOW_B,
-        FAST_C, SLOW_C,
-        FAST_D, SLOW_D
-    };
+        FAST_A,
+        SLOW_A,
+        FAST_B,
+        SLOW_B,
+        FAST_C,
+        SLOW_C,
+        FAST_D,
+        SLOW_D,
+    }
 
     enum Signals {
-        CROSS_ABOVE_A, CROSS_BELOW_A,
-        CROSS_ABOVE_B, CROSS_BELOW_B,
-        CROSS_ABOVE_C, CROSS_BELOW_C,
-        CROSS_ABOVE_D, CROSS_BELOW_D
-    };
+        CROSS_ABOVE_A,
+        CROSS_BELOW_A,
+        CROSS_ABOVE_B,
+        CROSS_BELOW_B,
+        CROSS_ABOVE_C,
+        CROSS_BELOW_C,
+        CROSS_ABOVE_D,
+        CROSS_BELOW_D,
+    }
 
     // SMA Bands color palette
     private static final Color CLR_A_SLOW = new Color(120, 123, 134, 255);
@@ -182,12 +189,68 @@ public class BuddhaBands extends Study {
         grp.addRow(new PathDescriptor(PATH_A2, "Slow", CLR_A_SLOW, 1.0f, null, true, false, true));
         // Group - Top and Bottom Fill
         grp = tab.addGroup("Fill");
-        grp.addRow(new ShadeDescriptor(FILL_A_TOP, "Top Fill", PATH_A1, PATH_A2, Enums.ShadeType.ABOVE, CLR_A_TOP_FILL, true, true));
-        grp.addRow(new ShadeDescriptor(FILL_A_BOTTOM, "Bottom Fill", PATH_A1, PATH_A2, Enums.ShadeType.BELOW, CLR_A_BOTTOM_FILL, true, true));
+        grp.addRow(
+            new ShadeDescriptor(
+                FILL_A_TOP,
+                "Top Fill",
+                PATH_A1,
+                PATH_A2,
+                Enums.ShadeType.ABOVE,
+                CLR_A_TOP_FILL,
+                true,
+                true
+            )
+        );
+        grp.addRow(
+            new ShadeDescriptor(
+                FILL_A_BOTTOM,
+                "Bottom Fill",
+                PATH_A1,
+                PATH_A2,
+                Enums.ShadeType.BELOW,
+                CLR_A_BOTTOM_FILL,
+                true,
+                true
+            )
+        );
         // Group - Indicators
         grp = tab.addGroup("Indicators");
-        grp.addRow(new IndicatorDescriptor(IND_A1, "Fast", CLR_A_FAST, CLR_TEXT, defaults.getFont(), true, CLR_A_FAST, 1.0f, null, true, true, "20 SMA", true, true));
-        grp.addRow(new IndicatorDescriptor(IND_A2, "Slow", CLR_A_SLOW, CLR_TEXT, defaults.getFont(), true, CLR_A_SLOW, 1.0f, null, true, true, "21 SMA", true, true));
+        grp.addRow(
+            new IndicatorDescriptor(
+                IND_A1,
+                "Fast",
+                CLR_A_FAST,
+                CLR_TEXT,
+                defaults.getFont(),
+                true,
+                CLR_A_FAST,
+                1.0f,
+                null,
+                true,
+                true,
+                "20 SMA",
+                true,
+                true
+            )
+        );
+        grp.addRow(
+            new IndicatorDescriptor(
+                IND_A2,
+                "Slow",
+                CLR_A_SLOW,
+                CLR_TEXT,
+                defaults.getFont(),
+                true,
+                CLR_A_SLOW,
+                1.0f,
+                null,
+                true,
+                true,
+                "21 SMA",
+                true,
+                true
+            )
+        );
 
         // Tab - B
         tab = sd.addTab("Band B");
@@ -207,12 +270,68 @@ public class BuddhaBands extends Study {
         grp.addRow(new PathDescriptor(PATH_B2, "Slow", CLR_B_SLOW, 1.0f, null, true, false, true));
         // Group - Fill
         grp = tab.addGroup("Fill");
-        grp.addRow(new ShadeDescriptor(FILL_B_TOP, "Top Fill", PATH_B1, PATH_B2, Enums.ShadeType.ABOVE, CLR_B_TOP_FILL, true, true));
-        grp.addRow(new ShadeDescriptor(FILL_B_BOTTOM, "Bottom Fill", PATH_B1, PATH_B2, Enums.ShadeType.BELOW, CLR_B_BOTTOM_FILL, true, true));
+        grp.addRow(
+            new ShadeDescriptor(
+                FILL_B_TOP,
+                "Top Fill",
+                PATH_B1,
+                PATH_B2,
+                Enums.ShadeType.ABOVE,
+                CLR_B_TOP_FILL,
+                true,
+                true
+            )
+        );
+        grp.addRow(
+            new ShadeDescriptor(
+                FILL_B_BOTTOM,
+                "Bottom Fill",
+                PATH_B1,
+                PATH_B2,
+                Enums.ShadeType.BELOW,
+                CLR_B_BOTTOM_FILL,
+                true,
+                true
+            )
+        );
         // Group - Indicators
         grp = tab.addGroup("Indicators");
-        grp.addRow(new IndicatorDescriptor(IND_B1, "Fast", CLR_B_FAST, CLR_TEXT, defaults.getFont(), true, CLR_B_FAST, 1.0f, null, true, true, "50 SMA", true, true));
-        grp.addRow(new IndicatorDescriptor(IND_B2, "Slow", CLR_B_SLOW, CLR_TEXT, defaults.getFont(), true, CLR_B_SLOW, 1.0f, null, true, true, "55 SMA", true, true));
+        grp.addRow(
+            new IndicatorDescriptor(
+                IND_B1,
+                "Fast",
+                CLR_B_FAST,
+                CLR_TEXT,
+                defaults.getFont(),
+                true,
+                CLR_B_FAST,
+                1.0f,
+                null,
+                true,
+                true,
+                "50 SMA",
+                true,
+                true
+            )
+        );
+        grp.addRow(
+            new IndicatorDescriptor(
+                IND_B2,
+                "Slow",
+                CLR_B_SLOW,
+                CLR_TEXT,
+                defaults.getFont(),
+                true,
+                CLR_B_SLOW,
+                1.0f,
+                null,
+                true,
+                true,
+                "55 SMA",
+                true,
+                true
+            )
+        );
 
         // Tab - C
         tab = sd.addTab("Band C");
@@ -232,12 +351,68 @@ public class BuddhaBands extends Study {
         grp.addRow(new PathDescriptor(PATH_C2, "Slow", CLR_C_SLOW, 1.0f, null, true, false, true));
         // Group - Fill
         grp = tab.addGroup("Fill");
-        grp.addRow(new ShadeDescriptor(FILL_C_TOP, "Top Fill", PATH_C1, PATH_C2, Enums.ShadeType.ABOVE, CLR_C_TOP_FILL, true, true));
-        grp.addRow(new ShadeDescriptor(FILL_C_BOTTOM, "Bottom Fill", PATH_C1, PATH_C2, Enums.ShadeType.BELOW, CLR_C_BOTTOM_FILL, true, true));
+        grp.addRow(
+            new ShadeDescriptor(
+                FILL_C_TOP,
+                "Top Fill",
+                PATH_C1,
+                PATH_C2,
+                Enums.ShadeType.ABOVE,
+                CLR_C_TOP_FILL,
+                true,
+                true
+            )
+        );
+        grp.addRow(
+            new ShadeDescriptor(
+                FILL_C_BOTTOM,
+                "Bottom Fill",
+                PATH_C1,
+                PATH_C2,
+                Enums.ShadeType.BELOW,
+                CLR_C_BOTTOM_FILL,
+                true,
+                true
+            )
+        );
         // Group - Indicators
         grp = tab.addGroup("Indicators");
-        grp.addRow(new IndicatorDescriptor(IND_C1, "Fast", CLR_C_FAST, CLR_TEXT, defaults.getFont(), true, CLR_C_FAST, 1.0f, null, true, true, "200 SMA", true, true));
-        grp.addRow(new IndicatorDescriptor(IND_C2, "Slow", CLR_C_SLOW, CLR_TEXT, defaults.getFont(), true, CLR_C_SLOW, 1.0f, null, true, true, "233 SMA", true, true));
+        grp.addRow(
+            new IndicatorDescriptor(
+                IND_C1,
+                "Fast",
+                CLR_C_FAST,
+                CLR_TEXT,
+                defaults.getFont(),
+                true,
+                CLR_C_FAST,
+                1.0f,
+                null,
+                true,
+                true,
+                "200 SMA",
+                true,
+                true
+            )
+        );
+        grp.addRow(
+            new IndicatorDescriptor(
+                IND_C2,
+                "Slow",
+                CLR_C_SLOW,
+                CLR_TEXT,
+                defaults.getFont(),
+                true,
+                CLR_C_SLOW,
+                1.0f,
+                null,
+                true,
+                true,
+                "233 SMA",
+                true,
+                true
+            )
+        );
 
         // Tab - D
         tab = sd.addTab("Band D");
@@ -257,51 +432,210 @@ public class BuddhaBands extends Study {
         grp.addRow(new PathDescriptor(PATH_D2, "Slow", CLR_D_SLOW, 1.0f, null, true, false, true));
         // Group - Fill
         grp = tab.addGroup("Fill");
-        grp.addRow(new ShadeDescriptor(FILL_D_TOP, "Top Fill", PATH_D1, PATH_D2, Enums.ShadeType.ABOVE, CLR_D_TOP_FILL, true, true));
-        grp.addRow(new ShadeDescriptor(FILL_D_BOTTOM, "Bottom Fill", PATH_D1, PATH_D2, Enums.ShadeType.BELOW, CLR_D_BOTTOM_FILL, true, true));
+        grp.addRow(
+            new ShadeDescriptor(
+                FILL_D_TOP,
+                "Top Fill",
+                PATH_D1,
+                PATH_D2,
+                Enums.ShadeType.ABOVE,
+                CLR_D_TOP_FILL,
+                true,
+                true
+            )
+        );
+        grp.addRow(
+            new ShadeDescriptor(
+                FILL_D_BOTTOM,
+                "Bottom Fill",
+                PATH_D1,
+                PATH_D2,
+                Enums.ShadeType.BELOW,
+                CLR_D_BOTTOM_FILL,
+                true,
+                true
+            )
+        );
         // Group - Indicators
         grp = tab.addGroup("Indicators");
-        grp.addRow(new IndicatorDescriptor(IND_D1, "Fast", CLR_D_FAST, CLR_TEXT, defaults.getFont(), true, CLR_D_FAST, 1.0f, null, true, true, "365 SMA", true, true));
-        grp.addRow(new IndicatorDescriptor(IND_D2, "Slow", CLR_D_SLOW, CLR_TEXT, defaults.getFont(), true, CLR_D_SLOW, 1.0f, null, true, true, "377 SMA", true, true));
+        grp.addRow(
+            new IndicatorDescriptor(
+                IND_D1,
+                "Fast",
+                CLR_D_FAST,
+                CLR_TEXT,
+                defaults.getFont(),
+                true,
+                CLR_D_FAST,
+                1.0f,
+                null,
+                true,
+                true,
+                "365 SMA",
+                true,
+                true
+            )
+        );
+        grp.addRow(
+            new IndicatorDescriptor(
+                IND_D2,
+                "Slow",
+                CLR_D_SLOW,
+                CLR_TEXT,
+                defaults.getFont(),
+                true,
+                CLR_D_SLOW,
+                1.0f,
+                null,
+                true,
+                true,
+                "377 SMA",
+                true,
+                true
+            )
+        );
 
         // Tab - Markers
         tab = sd.addTab("Markers");
         // Group - Band A
         grp = tab.addGroup("Band A");
-        grp.addRow(new MarkerDescriptor(UP_MARKER_A, "Up Marker A", Enums.MarkerType.TRIANGLE, Enums.Size.SMALL, CLR_UP, defaults.getLineColor(), false, true));
-        grp.addRow(new MarkerDescriptor(DOWN_MARKER_A, "Down Marker A", Enums.MarkerType.TRIANGLE, Enums.Size.SMALL, CLR_DOWN, defaults.getLineColor(), false, true));
+        grp.addRow(
+            new MarkerDescriptor(
+                UP_MARKER_A,
+                "Up Marker A",
+                Enums.MarkerType.TRIANGLE,
+                Enums.Size.SMALL,
+                CLR_UP,
+                defaults.getLineColor(),
+                false,
+                true
+            )
+        );
+        grp.addRow(
+            new MarkerDescriptor(
+                DOWN_MARKER_A,
+                "Down Marker A",
+                Enums.MarkerType.TRIANGLE,
+                Enums.Size.SMALL,
+                CLR_DOWN,
+                defaults.getLineColor(),
+                false,
+                true
+            )
+        );
         // Group - Band B
         grp = tab.addGroup("Band B");
-        grp.addRow(new MarkerDescriptor(UP_MARKER_B, "Up Marker B", Enums.MarkerType.TRIANGLE, Enums.Size.SMALL, CLR_UP, defaults.getLineColor(), false, true));
-        grp.addRow(new MarkerDescriptor(DOWN_MARKER_B, "Down Marker B", Enums.MarkerType.TRIANGLE, Enums.Size.SMALL, CLR_DOWN, defaults.getLineColor(), false, true));
+        grp.addRow(
+            new MarkerDescriptor(
+                UP_MARKER_B,
+                "Up Marker B",
+                Enums.MarkerType.TRIANGLE,
+                Enums.Size.SMALL,
+                CLR_UP,
+                defaults.getLineColor(),
+                false,
+                true
+            )
+        );
+        grp.addRow(
+            new MarkerDescriptor(
+                DOWN_MARKER_B,
+                "Down Marker B",
+                Enums.MarkerType.TRIANGLE,
+                Enums.Size.SMALL,
+                CLR_DOWN,
+                defaults.getLineColor(),
+                false,
+                true
+            )
+        );
         // Group - Band C
         grp = tab.addGroup("Band C");
-        grp.addRow(new MarkerDescriptor(UP_MARKER_C, "Up Marker C", Enums.MarkerType.TRIANGLE, Enums.Size.SMALL, CLR_UP, defaults.getLineColor(), false, true));
-        grp.addRow(new MarkerDescriptor(DOWN_MARKER_C, "Down Marker C", Enums.MarkerType.TRIANGLE, Enums.Size.SMALL, CLR_DOWN, defaults.getLineColor(), false, true));
+        grp.addRow(
+            new MarkerDescriptor(
+                UP_MARKER_C,
+                "Up Marker C",
+                Enums.MarkerType.TRIANGLE,
+                Enums.Size.SMALL,
+                CLR_UP,
+                defaults.getLineColor(),
+                false,
+                true
+            )
+        );
+        grp.addRow(
+            new MarkerDescriptor(
+                DOWN_MARKER_C,
+                "Down Marker C",
+                Enums.MarkerType.TRIANGLE,
+                Enums.Size.SMALL,
+                CLR_DOWN,
+                defaults.getLineColor(),
+                false,
+                true
+            )
+        );
         // Group - Band D
         grp = tab.addGroup("Band D");
-        grp.addRow(new MarkerDescriptor(UP_MARKER_D, "Up Marker D", Enums.MarkerType.TRIANGLE, Enums.Size.SMALL, CLR_UP, defaults.getLineColor(), false, true));
-        grp.addRow(new MarkerDescriptor(DOWN_MARKER_D, "Down Marker D", Enums.MarkerType.TRIANGLE, Enums.Size.SMALL, CLR_DOWN, defaults.getLineColor(), false, true));
+        grp.addRow(
+            new MarkerDescriptor(
+                UP_MARKER_D,
+                "Up Marker D",
+                Enums.MarkerType.TRIANGLE,
+                Enums.Size.SMALL,
+                CLR_UP,
+                defaults.getLineColor(),
+                false,
+                true
+            )
+        );
+        grp.addRow(
+            new MarkerDescriptor(
+                DOWN_MARKER_D,
+                "Down Marker D",
+                Enums.MarkerType.TRIANGLE,
+                Enums.Size.SMALL,
+                CLR_DOWN,
+                defaults.getLineColor(),
+                false,
+                true
+            )
+        );
 
         // === RUNTIME DESCRIPTOR ===
         var desc = createRD();
         desc.setLabelSettings(
-                INPUT_A1, METHOD_A1, PERIOD_A1,
-                INPUT_B1, METHOD_B1, PERIOD_B1,
-                INPUT_B2, METHOD_B2, PERIOD_B2,
-                INPUT_C1, METHOD_C1, PERIOD_C1,
-                INPUT_C2, METHOD_C2, PERIOD_C2,
-                INPUT_D1, METHOD_D1, PERIOD_D1,
-                INPUT_D2, METHOD_D2, PERIOD_D2);
+            INPUT_A1,
+            METHOD_A1,
+            PERIOD_A1,
+            INPUT_B1,
+            METHOD_B1,
+            PERIOD_B1,
+            INPUT_B2,
+            METHOD_B2,
+            PERIOD_B2,
+            INPUT_C1,
+            METHOD_C1,
+            PERIOD_C1,
+            INPUT_C2,
+            METHOD_C2,
+            PERIOD_C2,
+            INPUT_D1,
+            METHOD_D1,
+            PERIOD_D1,
+            INPUT_D2,
+            METHOD_D2,
+            PERIOD_D2
+        );
 
-        desc.exportValue(new ValueDescriptor(Values.FAST_A, "Fast A", new String[]{INPUT_A1, METHOD_A1, PERIOD_A1}));
-        desc.exportValue(new ValueDescriptor(Values.SLOW_A, "Slow A", new String[]{INPUT_A2, METHOD_A2, PERIOD_A2}));
-        desc.exportValue(new ValueDescriptor(Values.FAST_B, "Fast B", new String[]{INPUT_B1, METHOD_B1, PERIOD_B1}));
-        desc.exportValue(new ValueDescriptor(Values.SLOW_B, "Slow B", new String[]{INPUT_B2, METHOD_B2, PERIOD_B2}));
-        desc.exportValue(new ValueDescriptor(Values.FAST_C, "Fast C", new String[]{INPUT_C1, METHOD_C1, PERIOD_C1}));
-        desc.exportValue(new ValueDescriptor(Values.SLOW_C, "Slow C", new String[]{INPUT_C2, METHOD_C2, PERIOD_C2}));
-        desc.exportValue(new ValueDescriptor(Values.FAST_D, "Fast D", new String[]{INPUT_D1, METHOD_D1, PERIOD_D1}));
-        desc.exportValue(new ValueDescriptor(Values.SLOW_D, "Slow D", new String[]{INPUT_D2, METHOD_D2, PERIOD_D2}));
+        desc.exportValue(new ValueDescriptor(Values.FAST_A, "Fast A", new String[] { INPUT_A1, METHOD_A1, PERIOD_A1 }));
+        desc.exportValue(new ValueDescriptor(Values.SLOW_A, "Slow A", new String[] { INPUT_A2, METHOD_A2, PERIOD_A2 }));
+        desc.exportValue(new ValueDescriptor(Values.FAST_B, "Fast B", new String[] { INPUT_B1, METHOD_B1, PERIOD_B1 }));
+        desc.exportValue(new ValueDescriptor(Values.SLOW_B, "Slow B", new String[] { INPUT_B2, METHOD_B2, PERIOD_B2 }));
+        desc.exportValue(new ValueDescriptor(Values.FAST_C, "Fast C", new String[] { INPUT_C1, METHOD_C1, PERIOD_C1 }));
+        desc.exportValue(new ValueDescriptor(Values.SLOW_C, "Slow C", new String[] { INPUT_C2, METHOD_C2, PERIOD_C2 }));
+        desc.exportValue(new ValueDescriptor(Values.FAST_D, "Fast D", new String[] { INPUT_D1, METHOD_D1, PERIOD_D1 }));
+        desc.exportValue(new ValueDescriptor(Values.SLOW_D, "Slow D", new String[] { INPUT_D2, METHOD_D2, PERIOD_D2 }));
 
         desc.exportValue(new ValueDescriptor(Signals.CROSS_ABOVE_A, Enums.ValueType.BOOLEAN, "Cross Above A"));
         desc.exportValue(new ValueDescriptor(Signals.CROSS_BELOW_A, Enums.ValueType.BOOLEAN, "Cross Below A"));
@@ -373,14 +707,54 @@ public class BuddhaBands extends Study {
         var series = ctx.getDataSeries();
 
         // Calculate and store the fast and slow MAs
-        Double fastMA_A = series.ma(getSettings().getMAMethod(METHOD_A1), index, fastPeriod_A, getSettings().getInput(INPUT_A1));
-        Double slowMA_A = series.ma(getSettings().getMAMethod(METHOD_A2), index, slowPeriod_A, getSettings().getInput(INPUT_A2));
-        Double fastMA_B = series.ma(getSettings().getMAMethod(METHOD_B1), index, fastPeriod_B, getSettings().getInput(INPUT_B1));
-        Double slowMA_B = series.ma(getSettings().getMAMethod(METHOD_B2), index, slowPeriod_B, getSettings().getInput(INPUT_B2));
-        Double fastMA_C = series.ma(getSettings().getMAMethod(METHOD_C1), index, fastPeriod_C, getSettings().getInput(INPUT_C1));
-        Double slowMA_C = series.ma(getSettings().getMAMethod(METHOD_C2), index, slowPeriod_C, getSettings().getInput(INPUT_C2));
-        Double fastMA_D = series.ma(getSettings().getMAMethod(METHOD_D1), index, fastPeriod_D, getSettings().getInput(INPUT_D1));
-        Double slowMA_D = series.ma(getSettings().getMAMethod(METHOD_D2), index, slowPeriod_D, getSettings().getInput(INPUT_D2));
+        Double fastMA_A = series.ma(
+            getSettings().getMAMethod(METHOD_A1),
+            index,
+            fastPeriod_A,
+            getSettings().getInput(INPUT_A1)
+        );
+        Double slowMA_A = series.ma(
+            getSettings().getMAMethod(METHOD_A2),
+            index,
+            slowPeriod_A,
+            getSettings().getInput(INPUT_A2)
+        );
+        Double fastMA_B = series.ma(
+            getSettings().getMAMethod(METHOD_B1),
+            index,
+            fastPeriod_B,
+            getSettings().getInput(INPUT_B1)
+        );
+        Double slowMA_B = series.ma(
+            getSettings().getMAMethod(METHOD_B2),
+            index,
+            slowPeriod_B,
+            getSettings().getInput(INPUT_B2)
+        );
+        Double fastMA_C = series.ma(
+            getSettings().getMAMethod(METHOD_C1),
+            index,
+            fastPeriod_C,
+            getSettings().getInput(INPUT_C1)
+        );
+        Double slowMA_C = series.ma(
+            getSettings().getMAMethod(METHOD_C2),
+            index,
+            slowPeriod_C,
+            getSettings().getInput(INPUT_C2)
+        );
+        Double fastMA_D = series.ma(
+            getSettings().getMAMethod(METHOD_D1),
+            index,
+            fastPeriod_D,
+            getSettings().getInput(INPUT_D1)
+        );
+        Double slowMA_D = series.ma(
+            getSettings().getMAMethod(METHOD_D2),
+            index,
+            slowPeriod_D,
+            getSettings().getInput(INPUT_D2)
+        );
 
         if (fastMA_A == null || slowMA_A == null) {
             return;

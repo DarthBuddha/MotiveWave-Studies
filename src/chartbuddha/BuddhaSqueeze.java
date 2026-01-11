@@ -1,7 +1,5 @@
 package chartbuddha;
 
-import java.awt.Color;
-
 import com.motivewave.platform.sdk.common.Coordinate;
 import com.motivewave.platform.sdk.common.DataContext;
 import com.motivewave.platform.sdk.common.DataSeries;
@@ -17,23 +15,28 @@ import com.motivewave.platform.sdk.common.desc.ValueDescriptor;
 import com.motivewave.platform.sdk.draw.Marker;
 import com.motivewave.platform.sdk.study.Study;
 import com.motivewave.platform.sdk.study.StudyHeader;
+import java.awt.Color;
 
 @StudyHeader(
-        namespace = "com.chartbuddha",
-        id = "BuddhaSqueeze",
-        name = "Buddha Squeeze",
-        desc = "The Buddha Squeeze highlights volatility compression and signals when the market is poised to break out with directional momentum.",
-        menu = "Chart Buddha",
-        signals = false,
-        overlay = false,
-        studyOverlay = true
+    namespace = "com.chartbuddha",
+    id = "BuddhaSqueeze",
+    name = "Buddha Squeeze",
+    desc = "The Buddha Squeeze highlights volatility compression and signals when the market is poised to break out with directional momentum.",
+    menu = "Chart Buddha",
+    signals = false,
+    overlay = false,
+    studyOverlay = true
 )
-
 public class BuddhaSqueeze extends Study {
 
     // Standard deviation values for Bollinger Bands and Keltner Channels
     enum Values {
-        OSC, LINREG, SQUEEZE_COUNT, SQUEEZE_MARKER, ATR_EMA, ATR_VALUE
+        OSC,
+        LINREG,
+        SQUEEZE_COUNT,
+        SQUEEZE_MARKER,
+        ATR_EMA,
+        ATR_VALUE,
     }
 
     // Buddha Bands color palette
@@ -77,7 +80,10 @@ public class BuddhaSqueeze extends Study {
             return null;
         }
 
-        double sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
+        double sumX = 0,
+            sumY = 0,
+            sumXY = 0,
+            sumX2 = 0;
         for (int i = 0; i < period; i++) {
             int barIndex = index - i;
             double y = series.getDouble(barIndex, source);
@@ -198,8 +204,18 @@ public class BuddhaSqueeze extends Study {
         display.addRow(new ColorDescriptor(COLOR_NEG_DEC, "Negative Decreasing", CLR_NEG_DEC));
 
         var squeeze = tab.addGroup("Squeeze");
-        squeeze.addRow(new MarkerDescriptor(SQUEEZE_MARKER, "Squeeze Dot",
-                Enums.MarkerType.CIRCLE, Enums.Size.MEDIUM, CLR_SQUEEZE, null, true, true));
+        squeeze.addRow(
+            new MarkerDescriptor(
+                SQUEEZE_MARKER,
+                "Squeeze Dot",
+                Enums.MarkerType.CIRCLE,
+                Enums.Size.MEDIUM,
+                CLR_SQUEEZE,
+                null,
+                true,
+                true
+            )
+        );
         squeeze.addRow(new ColorDescriptor(COLOR_SQUEEZE, "Squeeze Color", CLR_SQUEEZE));
         squeeze.addRow(new ColorDescriptor(COLOR_GUIDE, "No Squeeze Color", CLR_GUIDE));
 
@@ -209,7 +225,7 @@ public class BuddhaSqueeze extends Study {
         // === RUNTIME DESCRIPTOR ===
         var desc = createRD();
         desc.setLabelSettings(INPUT, PERIOD, BB_STD, KC_STD);
-        desc.exportValue(new ValueDescriptor(Values.OSC, "osc", new String[]{INPUT, PERIOD, BB_STD, KC_STD}));
+        desc.exportValue(new ValueDescriptor(Values.OSC, "osc", new String[] { INPUT, PERIOD, BB_STD, KC_STD }));
         desc.declareBars(Values.OSC, null);
         desc.declareIndicator(Values.OSC, Inputs.IND);
         desc.declareIndicator(Values.SQUEEZE_MARKER, SQUEEZE_MARKER);
@@ -329,5 +345,4 @@ public class BuddhaSqueeze extends Study {
 
         series.setComplete(index);
     }
-
 }
