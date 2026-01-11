@@ -3,4 +3,4 @@ Created-By: Lucas @ ChartBuddha
 Specification-Title: MotiveWave Studies
 Specification-Version: 1.0
 Implementation-Version: 2026.01.05
-MW-Study: script_buddha.BuddhaSqueeze script_buddha.BuddhaBands script_buddha.PriceLine
+MW-Study: script_buddha.BuddhaSqueeze script_buddha.BuddhaBands
