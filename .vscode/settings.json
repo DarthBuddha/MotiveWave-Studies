@@ -16,10 +16,6 @@
             {
                 "column": 120,
                 "color": "#F0F8FF20"
-            },
-            {
-                "column": 140,
-                "color": "#C8081550"
             }
         ],
         "editor.showFoldingControls": "always",
