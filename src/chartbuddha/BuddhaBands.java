@@ -1,5 +1,7 @@
 package chartbuddha;
 
+import java.awt.Color;
+
 import com.motivewave.platform.sdk.common.Coordinate;
 import com.motivewave.platform.sdk.common.DataContext;
 import com.motivewave.platform.sdk.common.Defaults;
@@ -15,7 +17,6 @@ import com.motivewave.platform.sdk.common.desc.ValueDescriptor;
 import com.motivewave.platform.sdk.draw.Marker;
 import com.motivewave.platform.sdk.study.Study;
 import com.motivewave.platform.sdk.study.StudyHeader;
-import java.awt.Color;
 
 @StudyHeader(
     namespace = "com.chartbuddha",
@@ -30,14 +31,14 @@ import java.awt.Color;
 public class BuddhaBands extends Study {
 
     enum Values {
-        FAST_A,
-        SLOW_A,
-        FAST_B,
-        SLOW_B,
-        FAST_C,
-        SLOW_C,
-        FAST_D,
-        SLOW_D,
+        VALUE_01,
+        VALUE_02,
+        VALUE_03,
+        VALUE_04,
+        VALUE_05,
+        VALUE_06,
+        VALUE_07,
+        VALUE_08,
     }
 
     enum Signals {
@@ -142,11 +143,11 @@ public class BuddhaBands extends Study {
     @Override
     /* === INITIALIZE === */
     public void initialize(Defaults defaults) {
-        // === SETTING DESCRIPTOR ===
+        // === SETTING DESCRIPTOR === //
         var sd = createSD();
 
         // Tab - A
-        var tab = sd.addTab("Band A");
+        var tab = sd.addTab("20-21");
         // Group - Fast Moving Average
         var grp = tab.addGroup("Fast Moving Average");
         grp.addRow(new InputDescriptor(INPUT_01, "Input", Enums.BarInput.CLOSE));
@@ -218,7 +219,7 @@ public class BuddhaBands extends Study {
         );
 
         // Tab - B
-        tab = sd.addTab("Band B");
+        tab = sd.addTab("50-55");
         // Group - Fast Moving Average
         grp = tab.addGroup("Fast Moving Average");
         grp.addRow(new InputDescriptor(INPUT_03, "Input", Enums.BarInput.CLOSE));
@@ -290,7 +291,7 @@ public class BuddhaBands extends Study {
         );
 
         // Tab - C
-        tab = sd.addTab("Band C");
+        tab = sd.addTab("200-233");
         // Group - Fast Moving Average
         grp = tab.addGroup("Fast Moving Average");
         grp.addRow(new InputDescriptor(INPUT_05, "Input", Enums.BarInput.CLOSE));
@@ -362,7 +363,7 @@ public class BuddhaBands extends Study {
         );
 
         // Tab - D
-        tab = sd.addTab("Band D");
+        tab = sd.addTab("365-377");
         // Group - Fast Moving Average
         grp = tab.addGroup("Fast Moving Average");
         grp.addRow(new InputDescriptor(INPUT_07, "Input", Enums.BarInput.CLOSE));
@@ -540,7 +541,7 @@ public class BuddhaBands extends Study {
             )
         );
 
-        // === RUNTIME DESCRIPTOR ===
+        // === RUNTIME DESCRIPTOR === //
         var desc = createRD();
         desc.setLabelSettings(
             INPUT_01,
@@ -566,14 +567,30 @@ public class BuddhaBands extends Study {
             PERIOD_08
         );
 
-        desc.exportValue(new ValueDescriptor(Values.FAST_A, "Fast A", new String[] { INPUT_01, METHOD_01, PERIOD_01 }));
-        desc.exportValue(new ValueDescriptor(Values.SLOW_A, "Slow A", new String[] { INPUT_02, METHOD_02, PERIOD_02 }));
-        desc.exportValue(new ValueDescriptor(Values.FAST_B, "Fast B", new String[] { INPUT_03, METHOD_03, PERIOD_03 }));
-        desc.exportValue(new ValueDescriptor(Values.SLOW_B, "Slow B", new String[] { INPUT_04, METHOD_04, PERIOD_04 }));
-        desc.exportValue(new ValueDescriptor(Values.FAST_C, "Fast C", new String[] { INPUT_05, METHOD_05, PERIOD_05 }));
-        desc.exportValue(new ValueDescriptor(Values.SLOW_C, "Slow C", new String[] { INPUT_06, METHOD_06, PERIOD_06 }));
-        desc.exportValue(new ValueDescriptor(Values.FAST_D, "Fast D", new String[] { INPUT_07, METHOD_07, PERIOD_07 }));
-        desc.exportValue(new ValueDescriptor(Values.SLOW_D, "Slow D", new String[] { INPUT_08, METHOD_08, PERIOD_08 }));
+        desc.exportValue(
+            new ValueDescriptor(Values.VALUE_01, "Value 01", new String[] { INPUT_01, METHOD_01, PERIOD_01 })
+        );
+        desc.exportValue(
+            new ValueDescriptor(Values.VALUE_02, "Value 02", new String[] { INPUT_02, METHOD_02, PERIOD_02 })
+        );
+        desc.exportValue(
+            new ValueDescriptor(Values.VALUE_03, "Value 03", new String[] { INPUT_03, METHOD_03, PERIOD_03 })
+        );
+        desc.exportValue(
+            new ValueDescriptor(Values.VALUE_04, "Value 04", new String[] { INPUT_04, METHOD_04, PERIOD_04 })
+        );
+        desc.exportValue(
+            new ValueDescriptor(Values.VALUE_05, "Value 05", new String[] { INPUT_05, METHOD_05, PERIOD_05 })
+        );
+        desc.exportValue(
+            new ValueDescriptor(Values.VALUE_06, "Value 06", new String[] { INPUT_06, METHOD_06, PERIOD_06 })
+        );
+        desc.exportValue(
+            new ValueDescriptor(Values.VALUE_07, "Value 07", new String[] { INPUT_07, METHOD_07, PERIOD_07 })
+        );
+        desc.exportValue(
+            new ValueDescriptor(Values.VALUE_08, "Value 08", new String[] { INPUT_08, METHOD_08, PERIOD_08 })
+        );
 
         desc.exportValue(new ValueDescriptor(Signals.CROSS_ABOVE_A, Enums.ValueType.BOOLEAN, "Cross Above A"));
         desc.exportValue(new ValueDescriptor(Signals.CROSS_BELOW_A, Enums.ValueType.BOOLEAN, "Cross Below A"));
@@ -584,23 +601,23 @@ public class BuddhaBands extends Study {
         desc.exportValue(new ValueDescriptor(Signals.CROSS_ABOVE_D, Enums.ValueType.BOOLEAN, "Cross Above D"));
         desc.exportValue(new ValueDescriptor(Signals.CROSS_BELOW_D, Enums.ValueType.BOOLEAN, "Cross Below D"));
 
-        desc.declarePath(Values.FAST_A, PATH_01);
-        desc.declarePath(Values.SLOW_A, PATH_02);
-        desc.declarePath(Values.FAST_B, PATH_03);
-        desc.declarePath(Values.SLOW_B, PATH_04);
-        desc.declarePath(Values.FAST_C, PATH_05);
-        desc.declarePath(Values.SLOW_C, PATH_06);
-        desc.declarePath(Values.FAST_D, PATH_07);
-        desc.declarePath(Values.SLOW_D, PATH_08);
+        desc.declarePath(Values.VALUE_01, PATH_01);
+        desc.declarePath(Values.VALUE_02, PATH_02);
+        desc.declarePath(Values.VALUE_03, PATH_03);
+        desc.declarePath(Values.VALUE_04, PATH_04);
+        desc.declarePath(Values.VALUE_05, PATH_05);
+        desc.declarePath(Values.VALUE_06, PATH_06);
+        desc.declarePath(Values.VALUE_07, PATH_07);
+        desc.declarePath(Values.VALUE_08, PATH_08);
 
-        desc.declareIndicator(Values.FAST_A, IND_01);
-        desc.declareIndicator(Values.SLOW_A, IND_02);
-        desc.declareIndicator(Values.FAST_B, IND_03);
-        desc.declareIndicator(Values.SLOW_B, IND_04);
-        desc.declareIndicator(Values.FAST_C, IND_05);
-        desc.declareIndicator(Values.SLOW_C, IND_06);
-        desc.declareIndicator(Values.FAST_D, IND_07);
-        desc.declareIndicator(Values.SLOW_D, IND_08);
+        desc.declareIndicator(Values.VALUE_01, IND_01);
+        desc.declareIndicator(Values.VALUE_02, IND_02);
+        desc.declareIndicator(Values.VALUE_03, IND_03);
+        desc.declareIndicator(Values.VALUE_04, IND_04);
+        desc.declareIndicator(Values.VALUE_05, IND_05);
+        desc.declareIndicator(Values.VALUE_06, IND_06);
+        desc.declareIndicator(Values.VALUE_07, IND_07);
+        desc.declareIndicator(Values.VALUE_08, IND_08);
         // Signals
         desc.declareSignal(Signals.CROSS_ABOVE_A, "Fast A Cross Above");
         desc.declareSignal(Signals.CROSS_BELOW_A, "Fast A Cross Below");
@@ -611,10 +628,10 @@ public class BuddhaBands extends Study {
         desc.declareSignal(Signals.CROSS_ABOVE_D, "Fast D Cross Above");
         desc.declareSignal(Signals.CROSS_BELOW_D, "Fast D Cross Below");
 
-        desc.setRangeKeys(Values.FAST_A, Values.SLOW_A);
-        desc.setRangeKeys(Values.FAST_B, Values.SLOW_B);
-        desc.setRangeKeys(Values.FAST_C, Values.SLOW_C);
-        desc.setRangeKeys(Values.FAST_D, Values.SLOW_D);
+        desc.setRangeKeys(Values.VALUE_01, Values.VALUE_02);
+        desc.setRangeKeys(Values.VALUE_03, Values.VALUE_04);
+        desc.setRangeKeys(Values.VALUE_05, Values.VALUE_06);
+        desc.setRangeKeys(Values.VALUE_07, Values.VALUE_08);
     }
 
     @Override
@@ -706,14 +723,14 @@ public class BuddhaBands extends Study {
             return;
         }
 
-        series.setDouble(index, Values.FAST_A, fastMA_A);
-        series.setDouble(index, Values.SLOW_A, slowMA_A);
-        series.setDouble(index, Values.FAST_B, fastMA_B);
-        series.setDouble(index, Values.SLOW_B, slowMA_B);
-        series.setDouble(index, Values.FAST_C, fastMA_C);
-        series.setDouble(index, Values.SLOW_C, slowMA_C);
-        series.setDouble(index, Values.FAST_D, fastMA_D);
-        series.setDouble(index, Values.SLOW_D, slowMA_D);
+        series.setDouble(index, Values.VALUE_01, fastMA_A);
+        series.setDouble(index, Values.VALUE_02, slowMA_A);
+        series.setDouble(index, Values.VALUE_03, fastMA_B);
+        series.setDouble(index, Values.VALUE_04, slowMA_B);
+        series.setDouble(index, Values.VALUE_05, fastMA_C);
+        series.setDouble(index, Values.VALUE_06, slowMA_C);
+        series.setDouble(index, Values.VALUE_07, fastMA_D);
+        series.setDouble(index, Values.VALUE_08, slowMA_D);
 
         if (!series.isBarComplete(index)) {
             return;
@@ -721,13 +738,13 @@ public class BuddhaBands extends Study {
 
         // Check to see if a cross occurred and raise signal.
         var c_A = new Coordinate(series.getStartTime(index), slowMA_A);
-        if (crossedAbove(series, index, Values.FAST_A, Values.SLOW_A)) {
+        if (crossedAbove(series, index, Values.VALUE_01, Values.VALUE_02)) {
             var marker = getSettings().getMarker(UP_MARKER_01);
             if (marker.isEnabled()) {
                 addFigure(new Marker(c_A, Enums.Position.BOTTOM, marker));
             }
             ctx.signal(index, Signals.CROSS_ABOVE_A, "Fast MA Crossed Above!", series.getClose(index));
-        } else if (crossedBelow(series, index, Values.FAST_A, Values.SLOW_A)) {
+        } else if (crossedBelow(series, index, Values.VALUE_01, Values.VALUE_02)) {
             var marker = getSettings().getMarker(DN_MARKER_01);
             if (marker.isEnabled()) {
                 addFigure(new Marker(c_A, Enums.Position.TOP, marker));
@@ -737,13 +754,13 @@ public class BuddhaBands extends Study {
 
         // Check to see if a cross occurred and raise signal.
         var c_B = new Coordinate(series.getStartTime(index), slowMA_B);
-        if (crossedAbove(series, index, Values.FAST_B, Values.SLOW_B)) {
+        if (crossedAbove(series, index, Values.VALUE_03, Values.VALUE_04)) {
             var marker = getSettings().getMarker(UP_MARKER_02);
             if (marker.isEnabled()) {
                 addFigure(new Marker(c_B, Enums.Position.BOTTOM, marker));
             }
             ctx.signal(index, Signals.CROSS_ABOVE_B, "Fast MA Crossed Above!", series.getClose(index));
-        } else if (crossedBelow(series, index, Values.FAST_B, Values.SLOW_B)) {
+        } else if (crossedBelow(series, index, Values.VALUE_03, Values.VALUE_04)) {
             var marker = getSettings().getMarker(DN_MARKER_02);
             if (marker.isEnabled()) {
                 addFigure(new Marker(c_B, Enums.Position.TOP, marker));
@@ -753,13 +770,13 @@ public class BuddhaBands extends Study {
 
         // Check to see if a cross occurred and raise signal.
         var c_C = new Coordinate(series.getStartTime(index), slowMA_C);
-        if (crossedAbove(series, index, Values.FAST_C, Values.SLOW_C)) {
+        if (crossedAbove(series, index, Values.VALUE_05, Values.VALUE_06)) {
             var marker = getSettings().getMarker(UP_MARKER_03);
             if (marker.isEnabled()) {
                 addFigure(new Marker(c_C, Enums.Position.BOTTOM, marker));
             }
             ctx.signal(index, Signals.CROSS_ABOVE_C, "Fast MA Crossed Above!", series.getClose(index));
-        } else if (crossedBelow(series, index, Values.FAST_C, Values.SLOW_C)) {
+        } else if (crossedBelow(series, index, Values.VALUE_05, Values.VALUE_06)) {
             var marker = getSettings().getMarker(DN_MARKER_03);
             if (marker.isEnabled()) {
                 addFigure(new Marker(c_C, Enums.Position.TOP, marker));
@@ -769,13 +786,13 @@ public class BuddhaBands extends Study {
 
         // Check to see if a cross occurred and raise signal.
         var c_D = new Coordinate(series.getStartTime(index), slowMA_D);
-        if (crossedAbove(series, index, Values.FAST_D, Values.SLOW_D)) {
+        if (crossedAbove(series, index, Values.VALUE_07, Values.VALUE_08)) {
             var marker = getSettings().getMarker(UP_MARKER_04);
             if (marker.isEnabled()) {
                 addFigure(new Marker(c_D, Enums.Position.BOTTOM, marker));
             }
             ctx.signal(index, Signals.CROSS_ABOVE_D, "Fast MA Crossed Above!", series.getClose(index));
-        } else if (crossedBelow(series, index, Values.FAST_D, Values.SLOW_D)) {
+        } else if (crossedBelow(series, index, Values.VALUE_07, Values.VALUE_08)) {
             var marker = getSettings().getMarker(DN_MARKER_04);
             if (marker.isEnabled()) {
                 addFigure(new Marker(c_D, Enums.Position.TOP, marker));

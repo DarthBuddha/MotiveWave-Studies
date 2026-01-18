@@ -22,6 +22,7 @@ import java.awt.Color;
     namespace = "com.chartbuddha",
     id = "BuddhaSqueeze",
     name = "Buddha Squeeze",
+    label = "Squeeze",
     desc = "The Buddha Squeeze highlights volatility compression and signals when the market is poised to break out with directional momentum.",
     menu = "Chart Buddha",
     signals = false,
@@ -35,8 +36,6 @@ public class BuddhaSqueeze extends Study {
         OSC,
         LINREG,
         SQUEEZE_COUNT,
-        SQUEEZE_MARKER,
-        ATR_EMA,
         ATR_VALUE,
     }
 
@@ -61,14 +60,29 @@ public class BuddhaSqueeze extends Study {
     private static final String K_PERIOD = "period";
     private static final String K_BB_STD = "bb_std";
     private static final String K_KC_STD = "kc_std";
+    private static final String K_ATR_PERIOD = "atr_period";
+    private static final String K_SQUEEZE_THRESHOLD = "squeeze_threshold";
     private static final String K_IND = "k_ind";
 
     private static final String SQUEEZE_MARKER = "squeeze_marker";
 
+    // Cached settings for performance
+    private int period;
+    private Object source;
+    private double bbStd;
+    private double kcStd;
+    private int atrPeriod;
+    private double squeezeThreshold;
+    private Color colorPosInc;
+    private Color colorPosDec;
+    private Color colorNegInc;
+    private Color colorNegDec;
+    private Color colorSqueeze;
+
     @Override
     /* === INITIALIZE === */
     public void initialize(Defaults defaults) {
-        // === SETTING DESCRIPTOR ===
+        // === SETTING DESCRIPTOR === //
         var sd = createSD();
         var tab = sd.addTab("General");
 
@@ -77,6 +91,8 @@ public class BuddhaSqueeze extends Study {
         grp.addRow(new IntegerDescriptor(K_PERIOD, "Period", 21, 1, 999, 1));
         grp.addRow(new DoubleDescriptor(K_BB_STD, "BB StdDev", 2.1, 0.1, 999, 0.1));
         grp.addRow(new DoubleDescriptor(K_KC_STD, "KC StdDev", 1.4, 0.1, 999, 0.1));
+        grp.addRow(new IntegerDescriptor(K_ATR_PERIOD, "ATR EMA Period", 50, 1, 999, 1));
+        grp.addRow(new DoubleDescriptor(K_SQUEEZE_THRESHOLD, "Squeeze Threshold", 1.08, 1.0, 2.0, 0.01));
 
         tab = sd.addTab("Histogram");
         grp = tab.addGroup("Colors");
@@ -94,7 +110,7 @@ public class BuddhaSqueeze extends Study {
                 defaults.getFont(),
                 true,
                 defaults.getBarColor(),
-                2.0f,
+                1.0f,
                 null,
                 true,
                 true,
@@ -126,7 +142,7 @@ public class BuddhaSqueeze extends Study {
 
         // === QUICK SETTINGS === //
         sd.addQuickSettings(K_INPUT, K_PERIOD, K_BB_STD, K_KC_STD);
-        // === RUNTIME DESCRIPTOR ===
+        // === RUNTIME DESCRIPTOR === //
         var desc = createRD();
         desc.declareBars(Values.OSC, null);
         desc.declareIndicator(Values.OSC, K_IND);
@@ -147,23 +163,39 @@ public class BuddhaSqueeze extends Study {
     }
 
     @Override
+    public void clearState() {
+        super.clearState();
+        // Cache settings for performance
+        var settings = getSettings();
+        period = settings.getInteger(K_PERIOD, 21);
+        source = settings.getInput(K_INPUT, Enums.BarInput.CLOSE);
+        bbStd = settings.getDouble(K_BB_STD, 2.1);
+        kcStd = settings.getDouble(K_KC_STD, 1.4);
+        atrPeriod = settings.getInteger(K_ATR_PERIOD, 50);
+        squeezeThreshold = settings.getDouble(K_SQUEEZE_THRESHOLD, 1.08);
+        colorPosInc = settings.getColor(K_COLOR_POS_INC);
+        colorPosDec = settings.getColor(K_COLOR_POS_DEC);
+        colorNegInc = settings.getColor(K_COLOR_NEG_INC);
+        colorNegDec = settings.getColor(K_COLOR_NEG_DEC);
+        colorSqueeze = settings.getColor(K_COLOR_SQUEEZE_ON);
+    }
+
+    @Override
     protected void calculate(int index, DataContext ctx) {
-        int period = getSettings().getInteger(K_PERIOD);
-        Object source = getSettings().getInput(K_INPUT, Enums.BarInput.CLOSE);
         var series = ctx.getDataSeries();
 
         // Regime-based volatility adjustment
         double stdBB;
         double stdKC;
 
-        // Calculate ATR and its 50-period EMA for volatility regime detection
+        // Calculate ATR once and cache it for both regime detection and squeeze calculation
         Double currentAtr = atr(series, index, period);
         if (currentAtr != null) {
             // Store ATR value in series for EMA calculation
             series.setDouble(index, Values.ATR_VALUE, currentAtr);
 
             // Calculate EMA of ATR using stored values
-            Double atrEma = series.ma(Enums.MAMethod.EMA, index, 50, Values.ATR_VALUE);
+            Double atrEma = series.ma(Enums.MAMethod.EMA, index, atrPeriod, Values.ATR_VALUE);
 
             // Determine volatility regime and set multipliers
             if (atrEma != null && currentAtr > atrEma) {
@@ -177,8 +209,8 @@ public class BuddhaSqueeze extends Study {
             }
         } else {
             // Fallback to user settings if ATR calculation fails
-            stdBB = getSettings().getDouble(K_BB_STD);
-            stdKC = getSettings().getDouble(K_KC_STD);
+            stdBB = this.bbStd;
+            stdKC = this.kcStd;
         }
 
         // Always calculate and store the linreg input (close - oscBase/2) for every bar
@@ -208,25 +240,24 @@ public class BuddhaSqueeze extends Study {
         // Store oscillator value (scaled by 100 like Pine Script)
         series.setDouble(index, Values.OSC, osc * 100);
 
-        // Color Logic
-        Color color_pos_Inc = getSettings().getColor(K_COLOR_POS_INC);
-        Color color_pos_Dec = getSettings().getColor(K_COLOR_POS_DEC);
-        Color color_neg_Inc = getSettings().getColor(K_COLOR_NEG_INC);
-        Color color_neg_Dec = getSettings().getColor(K_COLOR_NEG_DEC);
-        Color color_squeeze = getSettings().getColor(K_COLOR_SQUEEZE_ON);
+        // Color Logic - use cached colors
         Double prevOsc = series.getDouble(index - 1, Values.OSC);
-        if (prevOsc != null) {
-            Double currentOsc = series.getDouble(index, Values.OSC);
+        Double currentOsc = series.getDouble(index, Values.OSC);
+
+        if (prevOsc != null && currentOsc != null) {
             boolean increasing = currentOsc > prevOsc;
             if (increasing) {
-                series.setBarColor(index, Values.OSC, currentOsc > 0 ? color_pos_Inc : color_neg_Dec);
+                series.setBarColor(index, Values.OSC, currentOsc > 0 ? colorPosInc : colorNegDec);
             } else {
-                series.setBarColor(index, Values.OSC, currentOsc > 0 ? color_pos_Dec : color_neg_Inc);
+                series.setBarColor(index, Values.OSC, currentOsc > 0 ? colorPosDec : colorNegInc);
             }
+        } else if (currentOsc != null) {
+            // First bar or when prevOsc is null - default to positive/negative color based on sign
+            series.setBarColor(index, Values.OSC, currentOsc > 0 ? colorPosInc : colorNegInc);
         }
 
-        // Calculate squeeze signal
-        Boolean squeezeSignal = buddhaSqueeze(series, index, source, period, stdKC, stdBB);
+        // Calculate squeeze signal - pass cached ATR to avoid recalculation
+        Boolean squeezeSignal = buddhaSqueeze(series, index, currentAtr, stdKC, stdBB);
 
         if (squeezeSignal != null) {
             // Get previous squeeze count (0 if null or first bar)
@@ -250,7 +281,7 @@ public class BuddhaSqueeze extends Study {
 
             // Set path color based on squeeze state (use path index 0, not PATH string)
             Color guideColor = getSettings().getColor(K_COLOR_NO_SQUEEZE);
-            series.setPathColor(index, 0, squeezeSignal ? color_squeeze : guideColor);
+            series.setPathColor(index, 0, squeezeSignal ? colorSqueeze : guideColor);
         }
 
         // Draw the zero line path
@@ -369,9 +400,8 @@ public class BuddhaSqueeze extends Study {
     }
 
     // === SQUEEZE DETECTION FUNCTION ===
-    private Boolean buddhaSqueeze(DataSeries series, int index, Object source, int length, double stdKC, double stdBB) {
-        Double atrValue = atr(series, index, length);
-        Double stdevValue = stdev(series, index, source, length);
+    private Boolean buddhaSqueeze(DataSeries series, int index, Double atrValue, double stdKC, double stdBB) {
+        Double stdevValue = stdev(series, index, source, period);
 
         if (atrValue == null || stdevValue == null) {
             return null;
@@ -381,8 +411,11 @@ public class BuddhaSqueeze extends Study {
         double bbWidth = stdBB * stdevValue;
 
         // Squeeze occurs when BB width is less than or very close to KC width
-        // Using 1.08 threshold for fine-tuned sensitivity (8% tolerance)
-        boolean squeeze = kcWidth != 0 ? (bbWidth / kcWidth) < 1.08 : false;
+        if (kcWidth == 0) {
+            return false;
+        }
+
+        boolean squeeze = (bbWidth / kcWidth) < squeezeThreshold;
         return squeeze;
     }
 }

@@ -5,3 +5,5 @@ Specification-Version: 1.0
 Implementation-Version: 2026.01.05
 MW-Study: chartbuddha.BuddhaSqueeze 
  chartbuddha.BuddhaBands 
+ chartbuddha.BuddhaVolDelta 
+ chartbuddha.BuddhaDailyCVD 
