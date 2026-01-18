@@ -5,6 +5,8 @@ import com.motivewave.platform.sdk.common.DataContext;
 import com.motivewave.platform.sdk.common.DataSeries;
 import com.motivewave.platform.sdk.common.Defaults;
 import com.motivewave.platform.sdk.common.Enums;
+import com.motivewave.platform.sdk.common.IndicatorInfo;
+import com.motivewave.platform.sdk.common.MarkerInfo;
 import com.motivewave.platform.sdk.common.desc.ColorDescriptor;
 import com.motivewave.platform.sdk.common.desc.DoubleDescriptor;
 import com.motivewave.platform.sdk.common.desc.IndicatorDescriptor;
@@ -17,6 +19,7 @@ import com.motivewave.platform.sdk.draw.Marker;
 import com.motivewave.platform.sdk.study.Study;
 import com.motivewave.platform.sdk.study.StudyHeader;
 import java.awt.Color;
+import java.awt.Font;
 
 @StudyHeader(
     namespace = "com.chartbuddha",
@@ -31,40 +34,59 @@ import java.awt.Color;
 )
 public class BuddhaSqueeze extends Study {
 
-    // Standard deviation values for Bollinger Bands and Keltner Channels
-    enum Values {
-        OSC,
-        LINREG,
-        SQUEEZE_COUNT,
-        ATR_VALUE,
-    }
-
-    // Color palette
-    private static final Color C_POS_INC = new Color(000, 128, 000, 255); // Dark Green
-    private static final Color C_POS_DEC = new Color(255, 000, 000, 255); // Light Red
-    private static final Color C_NEG_INC = new Color(128, 000, 000, 255); // Dark Red
-    private static final Color C_NEG_DEC = new Color(000, 255, 000, 255); // Light Green
-    private static final Color C_SQUEEZE_ON = new Color(255, 215, 000, 192); // Gold
-    private static final Color C_NO_SQUEEZE = new Color(000, 000, 000, 000); // Transparent
-    private static final Color C_TEXT = new Color(000, 000, 000, 255);
-    // Color keys
-    private static final String K_COLOR_POS_INC = "color_pos_inc";
-    private static final String K_COLOR_POS_DEC = "color_pos_dec";
-    private static final String K_COLOR_NEG_INC = "color_neg_inc";
-    private static final String K_COLOR_NEG_DEC = "color_neg_dec";
-    private static final String K_COLOR_SQUEEZE_ON = "color_squeeze_on";
-    private static final String K_COLOR_NO_SQUEEZE = "color_no_squeeze";
-    // Settings keys
-    private static final String K_INPUT = "input";
-    private static final String K_PATH = "path";
-    private static final String K_PERIOD = "period";
-    private static final String K_BB_STD = "bb_std";
-    private static final String K_KC_STD = "kc_std";
-    private static final String K_ATR_PERIOD = "atr_period";
-    private static final String K_SQUEEZE_THRESHOLD = "squeeze_threshold";
-    private static final String K_IND = "k_ind";
-
+    // === Color Palette - ChartBuddha === //
+    /** Color - Transparent */
+    private static final Color CLR_TRANSP = new Color(000, 000, 000, 000); // Transparent
+    /** Color - Black */
+    private static final Color CLR_BLACK = new Color(000, 000, 000, 255); // Black
+    /** Color - White */
+    private static final Color CLR_WHITE = new Color(255, 255, 255, 255); // White
+    /** Color - Red */
+    private static final Color CLR_RED = new Color(255, 000, 000, 255); // Red
+    // === Color Palette - Study === //
+    /** Color - Histogram Positive Increasing */
+    private static final Color CP_01 = new Color(000, 128, 000, 255); // Dark Green
+    /** Color - Histogram Positive Decreasing */
+    private static final Color CP_02 = new Color(255, 000, 000, 255); // Light Red
+    /** Color - Histogram Negative Increasing */
+    private static final Color CP_03 = new Color(128, 000, 000, 255); // Dark Red
+    /** Color - Histogram Negative Decreasing */
+    private static final Color CP_04 = new Color(000, 255, 000, 255); // Light Green
+    /** Color - Squeeze On */
+    private static final Color CLR_SQUEEZE = new Color(255, 215, 000, 192); // Gold
+    // === Setting Keys === //
+    /** Color Key - Positive Trend Increasing */
+    private static final String COLOR_POS_INC = "color_pos_inc";
+    /** Color Key - Positive Trend Decreasing */
+    private static final String COLOR_POS_DEC = "color_pos_dec";
+    /** Color Key - Negative Trend Increasing */
+    private static final String COLOR_NEG_INC = "color_neg_inc";
+    /** Color Key - Negative Trend Decreasing */
+    private static final String COLOR_NEG_DEC = "color_neg_dec";
+    /** Color Key - Squeeze On */
+    private static final String COLOR_SQUEEZE_ON = "color_squeeze_on";
+    /** Color Key - No Squeeze */
+    private static final String COLOR_NO_SQUEEZE = "color_no_squeeze";
+    /** Input - Source */
+    private static final String INPUT = "input";
+    /** Period - Histogram */
+    private static final String PERIOD_01 = "period_01";
+    /** Period - ATR */
+    private static final String PERIOD_02 = "period_02";
+    /** Standard Deviation - Bollinger Bands */
+    private static final String STD_BB = "std_bb";
+    /** Standard Deviation - Keltner Channels */
+    private static final String STD_KC = "std_kc";
+    /** Path - Histogram */
+    private static final String PATH_01 = "path_01";
+    /** Squeeze - Threshold */
+    private static final String SQUEEZE_THRESHOLD = "squeeze_threshold";
+    /** Squeeze - Marker */
     private static final String SQUEEZE_MARKER = "squeeze_marker";
+    /** Indicator - Zero Line */
+    private static final String IND_00 = "ind_00";
+    /** Indicator - Oscillator */
+    private static final String IND_01 = "ind_01";
 
     // Cached settings for performance
     private int period;
@@ -79,86 +101,174 @@ public class BuddhaSqueeze extends Study {
     private Color colorNegDec;
     private Color colorSqueeze;
 
+    enum Values {
+        /** Value - Zero Line */
+        VALUE_00,
+        /** Value - Oscillator */
+        VALUE_01,
+        /** Value - Linear Regression */
+        VALUE_02,
+        /** Value - Squeeze Count */
+        VALUE_03,
+        /** Value - ATR for internal use */
+        VALUE_04,
+    }
+
     @Override
     /* === INITIALIZE === */
     public void initialize(Defaults defaults) {
-        // === SETTING DESCRIPTOR === //
+        /* === SETTING DESCRIPTOR === */
         var sd = createSD();
-        var tab = sd.addTab("General");
+        var indicatorFont = new Font("Monospaced", Font.BOLD, 16);
 
-        var grp = tab.addGroup("Inputs");
-        grp.addRow(new InputDescriptor(K_INPUT, "Source", Enums.BarInput.CLOSE));
-        grp.addRow(new IntegerDescriptor(K_PERIOD, "Period", 21, 1, 999, 1));
-        grp.addRow(new DoubleDescriptor(K_BB_STD, "BB StdDev", 2.1, 0.1, 999, 0.1));
-        grp.addRow(new DoubleDescriptor(K_KC_STD, "KC StdDev", 1.4, 0.1, 999, 0.1));
-        grp.addRow(new IntegerDescriptor(K_ATR_PERIOD, "ATR EMA Period", 50, 1, 999, 1));
-        grp.addRow(new DoubleDescriptor(K_SQUEEZE_THRESHOLD, "Squeeze Threshold", 1.08, 1.0, 2.0, 0.01));
+        // === Inputs TAB === //
+        var tab = sd.addTab("Inputs");
+        var grp = tab.addGroup("Histogram");
+        grp.addRow(new InputDescriptor(INPUT, "Source", Enums.BarInput.CLOSE));
+        grp.addRow(new IntegerDescriptor(PERIOD_01, "Period", 21, 1, 999, 1));
+        grp = tab.addGroup("Standard Deviations");
+        grp.addRow(new DoubleDescriptor(STD_BB, "BB StdDev", 2.1, 0.1, 999, 0.1));
+        grp.addRow(new DoubleDescriptor(STD_KC, "KC StdDev", 1.4, 0.1, 999, 0.1));
+        grp = tab.addGroup("Squeeze Sensitivity");
+        grp.addRow(new IntegerDescriptor(PERIOD_02, "ATR EMA Period", 50, 1, 999, 1));
+        grp.addRow(new DoubleDescriptor(SQUEEZE_THRESHOLD, "Squeeze Threshold", 1.08, 1.0, 2.0, 0.01));
 
+        // === Histogram TAB === //
         tab = sd.addTab("Histogram");
+        // Group - Colors
         grp = tab.addGroup("Colors");
-        grp.addRow(new ColorDescriptor(K_COLOR_POS_INC, "Positive Trend Increasing", C_POS_INC));
-        grp.addRow(new ColorDescriptor(K_COLOR_POS_DEC, "Positive Trend Decreasing", C_POS_DEC));
-        grp.addRow(new ColorDescriptor(K_COLOR_NEG_INC, "Negative Trend Increasing", C_NEG_INC));
-        grp.addRow(new ColorDescriptor(K_COLOR_NEG_DEC, "Negative Trend Decreasing", C_NEG_DEC));
+        grp.addRow(new ColorDescriptor(COLOR_POS_INC, "Positive Trend Increasing", CP_01));
+        grp.addRow(new ColorDescriptor(COLOR_POS_DEC, "Positive Trend Decreasing", CP_02));
+        grp.addRow(new ColorDescriptor(COLOR_NEG_INC, "Negative Trend Increasing", CP_03));
+        grp.addRow(new ColorDescriptor(COLOR_NEG_DEC, "Negative Trend Decreasing", CP_04));
+        // Group - Indicators
+        // Indicator - Oscillator
         grp = tab.addGroup("Indicators");
-        grp.addRow(
-            new IndicatorDescriptor(
-                K_IND,
-                "Osc",
-                defaults.getBarColor(),
-                C_TEXT,
-                defaults.getFont(),
-                true,
-                defaults.getBarColor(),
-                1.0f,
-                null,
-                true,
-                true,
-                "Osc",
-                true,
-                true
-            )
-        );
+        var IndicatorInfo01 = new IndicatorInfo(
+            "INDICATOR_INFO_01", // String - id
+            CLR_WHITE, // Color - Label
+            CLR_BLACK, // Color - Text
+            CLR_RED, // Color - Label Outline
+            true, // Bool - Outline Enabled
+            indicatorFont, // Font
+            true, // Bool - Show On Top
+            true, // Bool - Show Label
+            CLR_WHITE, // Color - Line
+            1.0f, // Float - Line Width
+            null, // Float - Line Dash
+            true, // Bool - Show Line
+            true, // Bool - Show Tag
+            "Osc", // String - Tag
+            CLR_BLACK, // Color - Tag Text
+            CLR_WHITE, // Color - Tag Background
+            true // Bool - Enabled
+        )
+            .setExtLastBar(true);
+        grp.addRow(new IndicatorDescriptor(IND_01, "Oscillator", IndicatorInfo01, true));
+        // Indicator - Zero Line
+        var IndicatorInfo00 = new IndicatorInfo(
+            "INDICATOR_INFO_00", // String - id
+            CLR_WHITE, // Color - Label
+            CLR_BLACK, // Color - Text
+            CLR_RED, // Color - Label Outline
+            true, // Bool - Outline Enabled
+            indicatorFont, // Font
+            false, // Bool - Show On Top
+            true, // Bool - Show Label
+            CLR_WHITE, // Color - Line
+            0.25f, // Float - Line Width
+            null, // Float - Line Dash
+            true, // Bool - Show Line
+            false, // Bool - Show Tag
+            "", // String - Tag
+            CLR_BLACK, // Color - Tag Text
+            CLR_WHITE, // Color - Tag Background
+            true // Bool - Enabled
+        )
+            .setExtLastBar(false);
+        grp.addRow(new IndicatorDescriptor(IND_00, "Zero Line", IndicatorInfo00, true));
 
+        // === Squeeze TAB === //
         tab = sd.addTab("Squeeze");
+        // Group - Squeeze Dots
         grp = tab.addGroup("Squeeze Dots");
+        var markerInfo01 = new MarkerInfo(
+            Enums.MarkerType.TRIANGLE, // Enums - Marker Type
+            Enums.Size.MEDIUM, // Enums - Size
+            CLR_SQUEEZE, // Color - Fill
+            CLR_BLACK, // Color - Text
+            CLR_SQUEEZE, // Color - Outline
+            true // Bool - Enabled
+        );
+        grp.addRow(new MarkerDescriptor(SQUEEZE_MARKER, "Squeeze Marker", markerInfo01, true));
+
+        // Group - Squeeze Line
+        grp = tab.addGroup("Squeeze Line");
+        grp.addRow(new ColorDescriptor(COLOR_SQUEEZE_ON, "Squeeze On", CLR_SQUEEZE));
+        grp.addRow(new ColorDescriptor(COLOR_NO_SQUEEZE, "No Squeeze", CLR_TRANSP));
+
         grp.addRow(
-            new MarkerDescriptor(
-                SQUEEZE_MARKER,
-                "Squeeze Dot",
-                Enums.MarkerType.CIRCLE,
-                Enums.Size.MEDIUM,
-                C_SQUEEZE_ON,
-                null,
-                false,
-                true
+            new PathDescriptor(
+                PATH_01, // String - Path Key
+                "Squeeze Path", // String - Label
+                CLR_TRANSP, // Color - Path Color
+                3.0f, // Float - Line Width
+                null, // Float - Dash (null for solid)
+                true, // Bool - Enabled
+                false, // Bool - Supports Max Points
+                true // Bool - Supports Disabled
             )
         );
 
-        grp = tab.addGroup("Squeeze Line");
-        grp.addRow(new ColorDescriptor(K_COLOR_SQUEEZE_ON, "Squeeze On", C_SQUEEZE_ON));
-        grp.addRow(new ColorDescriptor(K_COLOR_NO_SQUEEZE, "No Squeeze", C_NO_SQUEEZE));
-        grp.addRow(new PathDescriptor(K_PATH, "Squeeze Path", C_NO_SQUEEZE, 5.0f, null, true, false, true));
+        //  var pathInfo01 = new PathInfo(
+        //      CLR_TRANSP, // Color - Path Color
+        //      5.0f, // Float - Line Width
+        //      null, // Float - Dash (null for solid)
+        //      true, // Bool - Enabled
+        //      false, // Bool - Continuous
+        //      true, // Bool - Show All Bars
+        //      0, // Int - Bar Center (0 = all)
+        //      Integer.MAX_VALUE // Int - Max bars
+        //  );
+        //  grp.addRow(
+        //      new PathDescriptor(
+        //          PATH_01, // String - Path Key
+        //          "Squeeze Line", // String - Label
+        //          pathInfo01, // PathInfo - Path Info
+        //          true, // Bool - Enabled
+        //          false, // Bool - Show Tag
+        //          true // Bool - Supports Disabled
+        //      )
+        //  );
 
         // === QUICK SETTINGS === //
-        sd.addQuickSettings(K_INPUT, K_PERIOD, K_BB_STD, K_KC_STD);
-        // === RUNTIME DESCRIPTOR === //
+        sd.addQuickSettings(INPUT, PERIOD_01, STD_BB, STD_KC, PERIOD_02, SQUEEZE_THRESHOLD);
+
+        /* === RUNTIME DESCRIPTOR === */
         var desc = createRD();
-        desc.declareBars(Values.OSC, null);
-        desc.declareIndicator(Values.OSC, K_IND);
-        desc.declarePath(0, K_PATH);
-        desc.exportValue(
-            new ValueDescriptor(Values.OSC, "osc", new String[] { K_INPUT, K_PERIOD, K_BB_STD, K_KC_STD })
-        );
-        desc.setLabelSettings(K_INPUT, K_PERIOD, K_BB_STD, K_KC_STD);
-        desc.setRangeKeys(Values.OSC);
+        // Set Insets
         desc.setTopInsetPixels(20);
         desc.setBottomInsetPixels(20);
+        // Set Range Keys
+        desc.setRangeKeys(Values.VALUE_01);
+        // Declare Bars
+        desc.declareBars(Values.VALUE_01, null);
+        // Declare Paths
+        desc.declarePath(0, PATH_01);
+        // Declare Indicators
+        desc.declareIndicator(Values.VALUE_00, IND_00);
+        desc.declareIndicator(Values.VALUE_01, IND_01);
+        // Export Values
+        desc.exportValue(
+            new ValueDescriptor(Values.VALUE_01, "osc", new String[] { INPUT, PERIOD_01, STD_BB, STD_KC })
+        );
+        // Set Label Settings
+        desc.setLabelSettings(INPUT, PERIOD_01, STD_BB, STD_KC);
     }
 
     @Override
     public void onLoad(Defaults defaults) {
-        int p1 = getSettings().getInteger(K_PERIOD);
+        int p1 = getSettings().getInteger(PERIOD_01, 21);
         setMinBars(p1);
     }
 
@@ -167,17 +277,17 @@ public class BuddhaSqueeze extends Study {
         super.clearState();
         // Cache settings for performance
         var settings = getSettings();
-        period = settings.getInteger(K_PERIOD, 21);
-        source = settings.getInput(K_INPUT, Enums.BarInput.CLOSE);
-        bbStd = settings.getDouble(K_BB_STD, 2.1);
-        kcStd = settings.getDouble(K_KC_STD, 1.4);
-        atrPeriod = settings.getInteger(K_ATR_PERIOD, 50);
-        squeezeThreshold = settings.getDouble(K_SQUEEZE_THRESHOLD, 1.08);
-        colorPosInc = settings.getColor(K_COLOR_POS_INC);
-        colorPosDec = settings.getColor(K_COLOR_POS_DEC);
-        colorNegInc = settings.getColor(K_COLOR_NEG_INC);
-        colorNegDec = settings.getColor(K_COLOR_NEG_DEC);
-        colorSqueeze = settings.getColor(K_COLOR_SQUEEZE_ON);
+        period = settings.getInteger(PERIOD_01, 21);
+        source = settings.getInput(INPUT, Enums.BarInput.CLOSE);
+        bbStd = settings.getDouble(STD_BB, 2.1);
+        kcStd = settings.getDouble(STD_KC, 1.4);
+        atrPeriod = settings.getInteger(PERIOD_02, 50);
+        squeezeThreshold = settings.getDouble(SQUEEZE_THRESHOLD, 1.08);
+        colorPosInc = settings.getColor(COLOR_POS_INC);
+        colorPosDec = settings.getColor(COLOR_POS_DEC);
+        colorNegInc = settings.getColor(COLOR_NEG_INC);
+        colorNegDec = settings.getColor(COLOR_NEG_DEC);
+        colorSqueeze = settings.getColor(COLOR_SQUEEZE_ON);
     }
 
     @Override
@@ -192,10 +302,10 @@ public class BuddhaSqueeze extends Study {
         Double currentAtr = atr(series, index, period);
         if (currentAtr != null) {
             // Store ATR value in series for EMA calculation
-            series.setDouble(index, Values.ATR_VALUE, currentAtr);
+            series.setDouble(index, Values.VALUE_04, currentAtr);
 
             // Calculate EMA of ATR using stored values
-            Double atrEma = series.ma(Enums.MAMethod.EMA, index, atrPeriod, Values.ATR_VALUE);
+            Double atrEma = series.ma(Enums.MAMethod.EMA, index, atrPeriod, Values.VALUE_04);
 
             // Determine volatility regime and set multipliers
             if (atrEma != null && currentAtr > atrEma) {
@@ -223,7 +333,7 @@ public class BuddhaSqueeze extends Study {
             Double oscBase = (highest + lowest) / 2.0 + ema;
             Float closeVal = series.getClose(index);
             Double inputToLinReg = closeVal - (oscBase / 2.0);
-            series.setDouble(index, Values.LINREG, inputToLinReg);
+            series.setDouble(index, Values.VALUE_02, inputToLinReg);
         }
 
         // Only calculate oscillator once we have enough data for linreg
@@ -232,28 +342,27 @@ public class BuddhaSqueeze extends Study {
         }
 
         // Calculate linear regression on the stored LINREG values
-        Double osc = linreg(series, index, Values.LINREG, period, 0);
+        Double osc = linreg(series, index, Values.VALUE_02, period, 0);
         if (osc == null) {
             return;
         }
 
         // Store oscillator value (scaled by 100 like Pine Script)
-        series.setDouble(index, Values.OSC, osc * 100);
+        series.setDouble(index, Values.VALUE_01, osc * 100);
 
         // Color Logic - use cached colors
-        Double prevOsc = series.getDouble(index - 1, Values.OSC);
-        Double currentOsc = series.getDouble(index, Values.OSC);
-
+        Double prevOsc = series.getDouble(index - 1, Values.VALUE_01);
+        Double currentOsc = series.getDouble(index, Values.VALUE_01);
         if (prevOsc != null && currentOsc != null) {
             boolean increasing = currentOsc > prevOsc;
             if (increasing) {
-                series.setBarColor(index, Values.OSC, currentOsc > 0 ? colorPosInc : colorNegDec);
+                series.setBarColor(index, Values.VALUE_01, currentOsc > 0 ? colorPosInc : colorNegDec);
             } else {
-                series.setBarColor(index, Values.OSC, currentOsc > 0 ? colorPosDec : colorNegInc);
+                series.setBarColor(index, Values.VALUE_01, currentOsc > 0 ? colorPosDec : colorNegInc);
             }
         } else if (currentOsc != null) {
             // First bar or when prevOsc is null - default to positive/negative color based on sign
-            series.setBarColor(index, Values.OSC, currentOsc > 0 ? colorPosInc : colorNegInc);
+            series.setBarColor(index, Values.VALUE_01, currentOsc > 0 ? colorPosInc : colorNegInc);
         }
 
         // Calculate squeeze signal - pass cached ATR to avoid recalculation
@@ -261,34 +370,43 @@ public class BuddhaSqueeze extends Study {
 
         if (squeezeSignal != null) {
             // Get previous squeeze count (0 if null or first bar)
-            Double prevCount = index > 0 ? series.getDouble(index - 1, Values.SQUEEZE_COUNT) : null;
+            Double prevCount = index > 0 ? series.getDouble(index - 1, Values.VALUE_03) : null;
             int prevCountInt = (prevCount != null) ? prevCount.intValue() : 0;
 
             // Increment if squeeze is on, reset to 0 if off
             int squeezeCount = squeezeSignal ? (prevCountInt + 1) : 0;
 
             // Store the count
-            series.setDouble(index, Values.SQUEEZE_COUNT, (double) squeezeCount);
+            series.setDouble(index, Values.VALUE_03, (double) squeezeCount);
 
-            // Show marker at zero line when squeeze is on
-            if (squeezeSignal) {
+            // Show marker on opposite side of histogram when squeeze is on
+            if (squeezeSignal && currentOsc != null) {
                 var markerDesc = getSettings().getMarker(SQUEEZE_MARKER);
                 if (markerDesc.isEnabled()) {
-                    var coord = new Coordinate(series.getStartTime(index), 0.0);
-                    addFigure(new Marker(coord, Enums.Position.CENTER, markerDesc));
+                    // Place marker on opposite side of histogram
+                    // If histogram is positive, place marker above it (pointing down)
+                    // If histogram is negative, place marker below it (pointing up)
+                    double markerY = currentOsc > 0 ? currentOsc : currentOsc;
+                    Enums.Position markerPos = currentOsc > 0 ? Enums.Position.TOP : Enums.Position.BOTTOM;
+
+                    var coord = new Coordinate(series.getStartTime(index), markerY);
+                    addFigure(new Marker(coord, markerPos, markerDesc));
                 }
             }
 
             // Set path color based on squeeze state (use path index 0, not PATH string)
-            Color guideColor = getSettings().getColor(K_COLOR_NO_SQUEEZE);
+            Color guideColor = getSettings().getColor(COLOR_NO_SQUEEZE);
             series.setPathColor(index, 0, squeezeSignal ? colorSqueeze : guideColor);
         }
 
         // Draw the zero line path
-        var path = getSettings().getPath(K_PATH);
+        var path = getSettings().getPath(PATH_01);
         if (path != null && path.isEnabled()) {
             series.setDouble(index, 0, 0.0); // Set path value to 0 for the zero line
         }
+
+        // Store the values
+        series.setDouble(index, Values.VALUE_00, 0.0);
 
         series.setComplete(index);
     }
@@ -320,7 +438,7 @@ public class BuddhaSqueeze extends Study {
             sumX2 = 0;
         for (int i = 0; i < period; i++) {
             int barIndex = index - i;
-            double y = series.getDouble(barIndex, source);
+            Double y = series.getDouble(barIndex, source);
             if (Double.isNaN(y)) {
                 return null;
             }

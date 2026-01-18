@@ -1,8 +1,5 @@
 package chartbuddha;
 
-import java.awt.Color;
-import java.awt.Font;
-
 import com.motivewave.platform.sdk.common.Coordinate;
 import com.motivewave.platform.sdk.common.DataContext;
 import com.motivewave.platform.sdk.common.Defaults;
@@ -19,6 +16,8 @@ import com.motivewave.platform.sdk.common.desc.ValueDescriptor;
 import com.motivewave.platform.sdk.draw.Marker;
 import com.motivewave.platform.sdk.study.Study;
 import com.motivewave.platform.sdk.study.StudyHeader;
+import java.awt.Color;
+import java.awt.Font;
 
 @StudyHeader(
     namespace = "com.chartbuddha",
@@ -34,45 +33,45 @@ public class BuddhaBands extends Study {
 
     // SMA Bands color palette
     /** Color - Text */
-    private static final Color CP_00 = new Color(000, 000, 000, 255);
+    private static final Color CP_00 = new Color(000, 000, 000, 255); // Black
     /** Color - 20 SMA */
-    private static final Color CP_01 = new Color(120, 123, 134, 255);
+    private static final Color CP_01 = new Color(120, 123, 134, 255); // Gray
     /** Color - 21 SMA */
-    private static final Color CP_02 = new Color(120, 123, 134, 255);
+    private static final Color CP_02 = new Color(120, 123, 134, 255); // Gray
     /** Color - 50 SMA */
-    private static final Color CP_03 = new Color(000, 255, 255, 255);
+    private static final Color CP_03 = new Color(000, 255, 255, 255); // Cyan
     /** Color - 55 SMA */
-    private static final Color CP_04 = new Color(000, 000, 255, 255);
+    private static final Color CP_04 = new Color(000, 000, 255, 255); // Blue
     /** Color - 200 SMA */
-    private static final Color CP_05 = new Color(255, 255, 000, 255);
+    private static final Color CP_05 = new Color(255, 255, 000, 255); // Yellow
     /** Color - 233 SMA */
-    private static final Color CP_06 = new Color(255, 128, 000, 255);
+    private static final Color CP_06 = new Color(255, 128, 000, 255); // Orange
     /** Color - 365 SMA */
-    private static final Color CP_07 = new Color(255, 055, 255, 255);
+    private static final Color CP_07 = new Color(255, 055, 255, 255); // Magenta
     /** Color - 377 SMA */
-    private static final Color CP_08 = new Color(128, 000, 128, 255);
+    private static final Color CP_08 = new Color(128, 000, 128, 255); // Purple
     /** Color - 20 SMA Fill */
-    private static final Color CP_09 = new Color(120, 123, 134, 120);
+    private static final Color CP_09 = new Color(120, 123, 134, 120); // Gray Transparent
     /** Color - 21 SMA Fill */
-    private static final Color CP_10 = new Color(120, 123, 134, 120);
+    private static final Color CP_10 = new Color(120, 123, 134, 120); // Gray Transparent
     /** Color - 50 SMA Fill */
-    private static final Color CP_11 = new Color(000, 255, 255, 120);
+    private static final Color CP_11 = new Color(000, 255, 255, 120); // Cyan Transparent
     /** Color - 55 SMA Fill */
-    private static final Color CP_12 = new Color(000, 000, 255, 120);
+    private static final Color CP_12 = new Color(000, 000, 255, 120); // Blue Transparent
     /** Color - 200 SMA Fill */
-    private static final Color CP_13 = new Color(255, 255, 000, 120);
+    private static final Color CP_13 = new Color(255, 255, 000, 120); // Yellow Transparent
     /** Color - 233 SMA Fill */
-    private static final Color CP_14 = new Color(255, 128, 000, 120);
+    private static final Color CP_14 = new Color(255, 128, 000, 120); // Orange Transparent
     /** Color - 365 SMA Fill */
-    private static final Color CP_15 = new Color(255, 055, 255, 120);
+    private static final Color CP_15 = new Color(255, 055, 255, 120); // Magenta Transparent
     /** Color - 377 SMA Fill */
-    private static final Color CP_16 = new Color(128, 000, 128, 120);
+    private static final Color CP_16 = new Color(128, 000, 128, 120); // Purple Transparent
     /** Color - Tag Outline */
-    private static final Color CP_17 = new Color(255, 000, 000, 255);
+    private static final Color CP_17 = new Color(255, 000, 000, 255); // Red
     /** Color - Up Arrow */
-    private static final Color C_UP = new Color(000, 255, 000, 255);
+    private static final Color C_UP = new Color(000, 255, 000, 255); // Green
     /** Color - Down Arrow */
-    private static final Color C_DOWN = new Color(255, 000, 000, 255);
+    private static final Color C_DOWN = new Color(255, 000, 000, 255); // Red
     /** Input - 20 SMA */
     private static final String INPUT_01 = "input_01";
     /** Input - 21 SMA */
@@ -180,13 +179,21 @@ public class BuddhaBands extends Study {
     private static final String DN_MARKER_04 = "dn_marker_04";
 
     enum Values {
+        /** Value - 20 SMA */
         VALUE_01,
+        /** Value - 21 SMA */
         VALUE_02,
+        /** Value - 50 SMA */
         VALUE_03,
+        /** Value - 55 SMA */
         VALUE_04,
+        /** Value - 200 SMA */
         VALUE_05,
+        /** Value - 233 SMA */
         VALUE_06,
+        /** Value - 365 SMA */
         VALUE_07,
+        /** Value - 377 SMA */
         VALUE_08,
     }
 
@@ -617,30 +624,14 @@ public class BuddhaBands extends Study {
             PERIOD_08
         );
         // Export Values for Bands
-        desc.exportValue(
-            new ValueDescriptor(Values.VALUE_01, "SMA", new String[] { INPUT_01, METHOD_01, PERIOD_01 })
-        );
-        desc.exportValue(
-            new ValueDescriptor(Values.VALUE_02, "SMA", new String[] { INPUT_02, METHOD_02, PERIOD_02 })
-        );
-        desc.exportValue(
-            new ValueDescriptor(Values.VALUE_03, "SMA", new String[] { INPUT_03, METHOD_03, PERIOD_03 })
-        );
-        desc.exportValue(
-            new ValueDescriptor(Values.VALUE_04, "SMA", new String[] { INPUT_04, METHOD_04, PERIOD_04 })
-        );
-        desc.exportValue(
-            new ValueDescriptor(Values.VALUE_05, "SMA", new String[] { INPUT_05, METHOD_05, PERIOD_05 })
-        );
-        desc.exportValue(
-            new ValueDescriptor(Values.VALUE_06, "SMA", new String[] { INPUT_06, METHOD_06, PERIOD_06 })
-        );
-        desc.exportValue(
-            new ValueDescriptor(Values.VALUE_07, "SMA", new String[] { INPUT_07, METHOD_07, PERIOD_07 })
-        );
-        desc.exportValue(
-            new ValueDescriptor(Values.VALUE_08, "SMA", new String[] { INPUT_08, METHOD_08, PERIOD_08 })
-        );
+        desc.exportValue(new ValueDescriptor(Values.VALUE_01, "SMA", new String[] { INPUT_01, METHOD_01, PERIOD_01 }));
+        desc.exportValue(new ValueDescriptor(Values.VALUE_02, "SMA", new String[] { INPUT_02, METHOD_02, PERIOD_02 }));
+        desc.exportValue(new ValueDescriptor(Values.VALUE_03, "SMA", new String[] { INPUT_03, METHOD_03, PERIOD_03 }));
+        desc.exportValue(new ValueDescriptor(Values.VALUE_04, "SMA", new String[] { INPUT_04, METHOD_04, PERIOD_04 }));
+        desc.exportValue(new ValueDescriptor(Values.VALUE_05, "SMA", new String[] { INPUT_05, METHOD_05, PERIOD_05 }));
+        desc.exportValue(new ValueDescriptor(Values.VALUE_06, "SMA", new String[] { INPUT_06, METHOD_06, PERIOD_06 }));
+        desc.exportValue(new ValueDescriptor(Values.VALUE_07, "SMA", new String[] { INPUT_07, METHOD_07, PERIOD_07 }));
+        desc.exportValue(new ValueDescriptor(Values.VALUE_08, "SMA", new String[] { INPUT_08, METHOD_08, PERIOD_08 }));
         // Export Values for Signals
         desc.exportValue(new ValueDescriptor(Signals.CROSS_ABOVE_A, Enums.ValueType.BOOLEAN, "Cross Above A"));
         desc.exportValue(new ValueDescriptor(Signals.CROSS_BELOW_A, Enums.ValueType.BOOLEAN, "Cross Below A"));
