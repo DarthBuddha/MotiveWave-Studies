@@ -2,6 +2,7 @@ package chartbuddha;
 
 import com.motivewave.platform.sdk.common.BarSize;
 import com.motivewave.platform.sdk.common.DataContext;
+import com.motivewave.platform.sdk.common.DataSeries;
 import com.motivewave.platform.sdk.common.Defaults;
 import com.motivewave.platform.sdk.common.Enums;
 import com.motivewave.platform.sdk.common.IndicatorInfo;
@@ -12,18 +13,19 @@ import com.motivewave.platform.sdk.common.desc.BarSizeDescriptor;
 import com.motivewave.platform.sdk.common.desc.IndicatorDescriptor;
 import com.motivewave.platform.sdk.common.desc.PathDescriptor;
 import com.motivewave.platform.sdk.common.desc.ShadeDescriptor;
+import com.motivewave.platform.sdk.common.desc.ValueDescriptor;
 import com.motivewave.platform.sdk.study.Study;
 import com.motivewave.platform.sdk.study.StudyHeader;
 import java.awt.Color;
 import java.awt.Font;
 
-/** Displays volume as bars */
+/** Bar-based Daily Cumulative Volume Delta */
 @StudyHeader(
     namespace = "com.chartbuddha",
     id = "BUDDHA_DAILY_CVD",
     name = "Buddha Daily CVD",
     label = "Daily CVD",
-    desc = "Daily Cumulative Volume Delta",
+    desc = "Daily Cumulative Volume Delta with session reset",
     menu = "Chart Buddha",
     overlay = false,
     requiresVolume = true,
@@ -47,11 +49,13 @@ public class BuddhaDailyCVD extends Study {
     // === IND === //
     private static final String IND_01 = "ind_01";
     private static final String IND_02 = "ind_02";
+    // === SETTINGS === //
+    private static final String CALC_BARSIZE = "calcBarSize";
 
     enum Values {
-        VALUE_01, // Cumulative Volume Delta
-        VALUE_02, // Zero Line
-        VALUE_03, // Store session start time for comparison
+        CVD, // Cumulative Volume Delta
+        ZERO_LINE, // Zero Line
+        SESSION_START, // Tracks session start time for reset detection
     }
 
     @Override
@@ -62,6 +66,8 @@ public class BuddhaDailyCVD extends Study {
         var tab = sd.addTab("General");
         var grp = tab.addGroup("Session Reset");
         grp.addRow(new BarSizeDescriptor(Inputs.BARSIZE, "Reset Period", BarSize.getBarSize(1440))); // Default to daily (1440 minutes)
+        grp = tab.addGroup("Calculation");
+        grp.addRow(new BarSizeDescriptor(CALC_BARSIZE, "Calc Timeframe", BarSize.getBarSize(1))); // Default to 1 minute
         grp = tab.addGroup("CVD Line");
         var cvdInfo = new PathInfo(
             CP_02, // Positive Color (green)
@@ -138,67 +144,81 @@ public class BuddhaDailyCVD extends Study {
         // Set Insets
         desc.setTopInsetPixels(20);
         desc.setBottomInsetPixels(20);
-        // Set Range Keys
-        desc.setRangeKeys(Values.VALUE_01, Values.VALUE_02);
         // Declare Paths
-        desc.declarePath(Values.VALUE_01, PATH_01);
-        desc.declarePath(Values.VALUE_02, PATH_02);
+        desc.declarePath(Values.CVD, PATH_01);
+        desc.declarePath(Values.ZERO_LINE, PATH_02);
         // Declare Indicators
-        desc.declareIndicator(Values.VALUE_01, IND_01);
-        desc.declareIndicator(Values.VALUE_02, IND_02);
-    }
-
-    @Override
-    protected void calculate(int index, DataContext ctx) {
-        var series = ctx.getDataSeries();
-        var barSize = getSettings().getBarSize(Inputs.BARSIZE);
-        var instr = series.getInstrument();
-        boolean rth = ctx.isRTH(); // Regular Trading Hours
-
-        // Get current bar's session start using MotiveWave's utility
-        long currentTime = series.getStartTime(index);
-        long currentEnd = series.getEndTime(index);
-        long sessionStart = Util.getStartOfBar(currentTime, currentEnd, instr, barSize, rth);
-
-        // Calculate volume delta for this bar
-        double close = series.getClose(index);
-        double open = series.getOpen(index);
-        double volume = series.getVolume(index);
-
-        // If close > open, it's buying volume (positive), otherwise selling volume (negative)
-        double volumeDelta = 0.0;
-        if (close > open) {
-            volumeDelta = volume;
-        } else if (close < open) {
-            volumeDelta = -volume;
-        }
-        // If close == open, volumeDelta remains 0
-
-        // Check if this is a new session by comparing with previous bar's session start
-        double cvd = volumeDelta; // Default: start fresh with current bar's delta
-
-        if (index > 0) {
-            Double prevSessionStart = series.getDouble(index - 1, Values.VALUE_03);
-            if (prevSessionStart != null && prevSessionStart == sessionStart) {
-                // Same session, add to previous CVD
-                Double prevCVD = series.getDouble(index - 1, Values.VALUE_01);
-                if (prevCVD != null) {
-                    cvd = prevCVD + volumeDelta;
-                }
-            }
-            // If different session or no previous data, cvd stays as volumeDelta (fresh start)
-        }
-
-        // Store the values
-        series.setDouble(index, Values.VALUE_01, cvd);
-        series.setDouble(index, Values.VALUE_03, (double) sessionStart);
-        series.setDouble(index, Values.VALUE_02, 0.0);
-
-        series.setComplete(index);
+        desc.declareIndicator(Values.CVD, IND_01);
+        desc.declareIndicator(Values.ZERO_LINE, IND_02);
+        // Export Values
+        desc.exportValue(new ValueDescriptor(Values.CVD, "CVD", new String[] { Inputs.BARSIZE }));
+        desc.setRangeKeys(Values.CVD);
     }
 
     @Override
     public void clearState() {
         super.clearState();
+        barSize = getSettings().getBarSize(Inputs.BARSIZE);
+        calcBarSize = getSettings().getBarSize(CALC_BARSIZE);
     }
+
+    @Override
+    protected void calculate(int index, DataContext ctx) {
+        var series = ctx.getDataSeries();
+        var instr = series.getInstrument();
+        boolean rth = ctx.isRTH();
+
+        // Get current bar times
+        long startTime = series.getStartTime(index);
+        long endTime = series.getEndTime(index);
+
+        // Calculate the session start for this bar
+        long currentSessionStart = Util.getStartOfBar(startTime, endTime, instr, barSize, rth);
+
+        // Get the lower timeframe data series for accurate CVD calculation
+        DataSeries calcSeries = ctx.getDataSeries(calcBarSize);
+        if (calcSeries == null || calcSeries.size() == 0) {
+            // Fallback to current series if lower timeframe not available
+            calcSeries = series;
+        }
+
+        // Calculate CVD by summing all calc timeframe bars within the current session up to current bar's end time
+        double cumulativeDelta = 0.0;
+
+        // Find all calc timeframe bars that fall within the current session and up to current bar's end time
+        for (int i = 0; i < calcSeries.size(); i++) {
+            long calcBarStart = calcSeries.getStartTime(i);
+            long calcBarEnd = calcSeries.getEndTime(i);
+
+            // Get the session for this calc bar
+            long calcSessionStart = Util.getStartOfBar(calcBarStart, calcBarEnd, instr, barSize, rth);
+
+            // Only include bars in the current session and before/equal to current bar's end time
+            if (calcSessionStart == currentSessionStart && calcBarEnd <= endTime) {
+                double close = calcSeries.getClose(i);
+                double open = calcSeries.getOpen(i);
+                float volume = calcSeries.getVolumeAsFloat(i);
+
+                // Volume delta: positive if close >= open (buying pressure), negative otherwise
+                double volumeDelta = (close >= open) ? volume : -volume;
+                cumulativeDelta += volumeDelta;
+            }
+
+            // Stop when we've passed the current bar's end time
+            if (calcBarStart > endTime) {
+                break;
+            }
+        }
+
+        // Store values
+        series.setDouble(index, Values.CVD, cumulativeDelta);
+        series.setDouble(index, Values.ZERO_LINE, 0.0);
+        series.setDouble(index, Values.SESSION_START, (double) currentSessionStart);
+
+        series.setComplete(index);
+    }
+
+    // Cached settings
+    private BarSize barSize;
+    private BarSize calcBarSize;
 }

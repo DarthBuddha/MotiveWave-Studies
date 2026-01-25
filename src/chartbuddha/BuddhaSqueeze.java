@@ -130,8 +130,8 @@ public class BuddhaSqueeze extends Study {
         grp.addRow(new DoubleDescriptor(STD_BB, "BB StdDev", 2.1, 0.1, 999, 0.1));
         grp.addRow(new DoubleDescriptor(STD_KC, "KC StdDev", 1.4, 0.1, 999, 0.1));
         grp = tab.addGroup("Squeeze Sensitivity");
-        grp.addRow(new IntegerDescriptor(PERIOD_02, "ATR EMA Period", 50, 1, 999, 1));
-        grp.addRow(new DoubleDescriptor(SQUEEZE_THRESHOLD, "Squeeze Threshold", 1.08, 1.0, 2.0, 0.01));
+        grp.addRow(new IntegerDescriptor(PERIOD_02, "ATR EMA Period", 21, 1, 999, 1));
+        grp.addRow(new DoubleDescriptor(SQUEEZE_THRESHOLD, "Squeeze Threshold", 1.03, 0.1, 2.0, 0.01));
 
         // === Histogram TAB === //
         tab = sd.addTab("Histogram");
@@ -193,7 +193,7 @@ public class BuddhaSqueeze extends Study {
         // Group - Squeeze Dots
         grp = tab.addGroup("Squeeze Dots");
         var markerInfo01 = new MarkerInfo(
-            Enums.MarkerType.TRIANGLE, // Enums - Marker Type
+            Enums.MarkerType.LINE_ARROW, // Enums - Marker Type
             Enums.Size.MEDIUM, // Enums - Size
             CLR_SQUEEZE, // Color - Fill
             CLR_BLACK, // Color - Text
@@ -212,7 +212,7 @@ public class BuddhaSqueeze extends Study {
                 PATH_01, // String - Path Key
                 "Squeeze Path", // String - Label
                 CLR_TRANSP, // Color - Path Color
-                3.0f, // Float - Line Width
+                1.5f, // Float - Line Width
                 null, // Float - Dash (null for solid)
                 true, // Bool - Enabled
                 false, // Bool - Supports Max Points
@@ -242,7 +242,7 @@ public class BuddhaSqueeze extends Study {
         //  );
 
         // === QUICK SETTINGS === //
-        sd.addQuickSettings(INPUT, PERIOD_01, STD_BB, STD_KC, PERIOD_02, SQUEEZE_THRESHOLD);
+        sd.addQuickSettings(PATH_01, SQUEEZE_MARKER);
 
         /* === RUNTIME DESCRIPTOR === */
         var desc = createRD();

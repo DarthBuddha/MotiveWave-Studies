@@ -27,7 +27,8 @@ import java.awt.Font;
     desc = "Displays a signal arrow when two moving averages (fast and slow) cross.",
     menu = "Chart Buddha",
     overlay = true,
-    signals = true
+    signals = true,
+    underlayByDefault = true
 )
 public class BuddhaBands extends Study {
 
