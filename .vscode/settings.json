@@ -29,6 +29,7 @@
             "debuglevel",
             "destdir",
             "destfile",
+            "doji",
             "downmarker",
             "fileset",
             "HCENTER",
@@ -58,6 +59,7 @@
             "stdev",
             "todir",
             "UPMARKER",
+            "vmax",
             "VWAP",
             "Xlint"
         ]

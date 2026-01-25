@@ -17,7 +17,6 @@ import com.motivewave.platform.sdk.draw.Marker;
 import com.motivewave.platform.sdk.study.Study;
 import com.motivewave.platform.sdk.study.StudyHeader;
 import java.awt.Color;
-import java.awt.Font;
 
 @StudyHeader(
     namespace = "com.chartbuddha",
@@ -214,7 +213,7 @@ public class BuddhaBands extends Study {
     public void initialize(Defaults defaults) {
         /* === SETTING DESCRIPTOR === */
         var sd = createSD();
-        var indicatorFont = new Font("Monospaced", Font.BOLD, 16);
+        // var indicatorFont = new Font("Monospaced", Font.BOLD, 16);
 
         // Tab - A
         var tab = sd.addTab("20-21");
@@ -248,7 +247,7 @@ public class BuddhaBands extends Study {
             CP_00, // Color - Text
             CP_17, // Color - Label Outline
             false, // Bool - Outline Enabled
-            indicatorFont, // Font
+            defaults.getFont(), // Font
             false, // Bool - Show On Top
             true, // Bool - Show Label
             CP_01, // Color - Line
@@ -269,7 +268,7 @@ public class BuddhaBands extends Study {
             CP_00, // Color - Text
             CP_17, // Color - Label Outline
             false, // Bool - Outline Enabled
-            indicatorFont, // Font
+            defaults.getFont(), // Font
             false, // Bool - Show On Top
             true, // Bool - Show Label
             CP_02, // Color - Line
@@ -316,7 +315,7 @@ public class BuddhaBands extends Study {
             CP_00, // Color - Text
             CP_17, // Color - Label Outline
             false, // Bool - Outline Enabled
-            indicatorFont, // Font
+            defaults.getFont(), // Font
             false, // Bool - Show On Top
             true, // Bool - Show Label
             CP_03, // Color - Line
@@ -337,7 +336,7 @@ public class BuddhaBands extends Study {
             CP_00, // Color - Text
             CP_17, // Color - Label Outline
             false, // Bool - Outline Enabled
-            indicatorFont, // Font
+            defaults.getFont(), // Font
             false, // Bool - Show On Top
             true, // Bool - Show Label
             CP_04, // Color - Line
@@ -385,7 +384,7 @@ public class BuddhaBands extends Study {
             CP_00, // Color - Text
             CP_17, // Color - Label Outline
             false, // Bool - Outline Enabled
-            indicatorFont, // Font
+            defaults.getFont(), // Font
             false, // Bool - Show On Top
             true, // Bool - Show Label
             CP_05, // Color - Line
@@ -406,7 +405,7 @@ public class BuddhaBands extends Study {
             CP_00, // Color - Text
             CP_17, // Color - Label Outline
             false, // Bool - Outline Enabled
-            indicatorFont, // Font
+            defaults.getFont(), // Font
             false, // Bool - Show On Top
             true, // Bool - Show Label
             CP_06, // Color - Line
@@ -454,7 +453,7 @@ public class BuddhaBands extends Study {
             CP_00, // Color - Text
             CP_17, // Color - Label Outline
             false, // Bool - Outline Enabled
-            indicatorFont, // Font
+            defaults.getFont(), // Font
             false, // Bool - Show On Top
             true, // Bool - Show Label
             CP_07, // Color - Line
@@ -475,7 +474,7 @@ public class BuddhaBands extends Study {
             CP_00, // Color - Text
             CP_17, // Color - Label Outline
             false, // Bool - Outline Enabled
-            indicatorFont, // Font
+            defaults.getFont(), // Font
             false, // Bool - Show On Top
             true, // Bool - Show Label
             CP_08, // Color - Line

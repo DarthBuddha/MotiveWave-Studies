@@ -14,8 +14,14 @@ import com.motivewave.platform.sdk.common.desc.PathDescriptor;
 import com.motivewave.platform.sdk.common.desc.ValueDescriptor;
 import com.motivewave.platform.sdk.study.Study;
 import com.motivewave.platform.sdk.study.StudyHeader;
+import java.awt.Color;
 
-/** Displays volume as bars */
+/**
+ * Volume Delta indicator with Money Flow Multiplier weighting.
+ * Calculates volume delta by weighting volume based on where the close
+ * is within the high-low range. Includes cumulative volume delta (CVD)
+ * and moving average of volume delta.
+ */
 @StudyHeader(
     namespace = "com.chartbuddha",
     id = "BUDDHA_VOL_DELTA",
@@ -30,17 +36,21 @@ import com.motivewave.platform.sdk.study.StudyHeader;
 public class BuddhaVolDelta extends Study {
 
     enum Values {
-        VOLUME,
+        VOLUME, // Buy/Sell volume (foreground)
+        TOTAL, // Total volume (background)
         VMA,
     }
 
     // === COLOR PALETTE === //
-    // private static final Color C_01 = new Color(000, 128, 000, 255); // Dark Green
-    // private static final Color C_02 = new Color(128, 000, 000, 255); // Dark Red
-    // private static final Color C_03 = new Color(120, 120, 120, 255); // Gray
+    private static final Color C_LIME = new Color(0, 255, 0, 255); // Lime (strong buy)
+    private static final Color C_GREEN = new Color(0, 128, 0, 255); // Green (buy)
+    private static final Color C_GRAY = new Color(120, 120, 120, 255); // Gray (neutral)
+    private static final Color C_RED = new Color(128, 0, 0, 255); // Red (sell)
+    private static final Color C_DARK_RED = new Color(255, 0, 0, 255); // Dark Red (strong sell)
 
     // === INPUT === //
     private static final String VOLUME_IND = "volumeInd";
+    private static final String TOTAL_IND = "totalInd";
     private static final String VMA_IND = "vmaInd";
 
     @Override
@@ -51,19 +61,40 @@ public class BuddhaVolDelta extends Study {
         var tab = sd.addTab("General");
         // === Group: Volume
         var grp = tab.addGroup("Volume");
-        var bars = new PathDescriptor(Inputs.BAR, "Volume Bars", defaults.getBarColor(), 1.0f, null, true, false, true);
+
+        // Background: Total Volume with gradient
+        var totalBars = new PathDescriptor(
+            "totalBar",
+            "Total Volume (Background)",
+            C_GRAY,
+            1.0f,
+            null,
+            true,
+            false,
+            true
+        );
+        totalBars.setShowAsBars(true);
+        totalBars.setSupportsShowAsBars(true);
+        totalBars.setSupportsDisable(false);
+        totalBars.setColorPolicy(Enums.ColorPolicy.SOLID);
+        grp.addRow(totalBars);
+        grp.addRow(new IndicatorDescriptor(TOTAL_IND, "Indicator", null, null, false, false, true));
+
+        // Foreground: Buy/Sell Volume with solid colors
+        var bars = new PathDescriptor(
+            Inputs.BAR,
+            "Buy/Sell Volume (Foreground)",
+            defaults.getBarColor(),
+            1.0f,
+            null,
+            true,
+            false,
+            true
+        );
         bars.setShowAsBars(true);
         bars.setSupportsShowAsBars(true);
         bars.setSupportsDisable(false);
-        bars.setColorPolicies(
-            new Enums.ColorPolicy[] {
-                Enums.ColorPolicy.PRICE_BAR,
-                Enums.ColorPolicy.SOLID,
-                Enums.ColorPolicy.HIGHER_LOWER,
-                Enums.ColorPolicy.GRADIENT,
-            }
-        );
-        bars.setColorPolicy(Enums.ColorPolicy.PRICE_BAR);
+        bars.setColorPolicy(Enums.ColorPolicy.SOLID);
         grp.addRow(bars);
         grp.addRow(new IndicatorDescriptor(VOLUME_IND, "Indicator", null, null, false, true, true));
         // === Group: Moving Average
@@ -84,17 +115,17 @@ public class BuddhaVolDelta extends Study {
 
         // === RUNTIME DESCRIPTOR === //
         var desc = createRD();
-        desc.exportValue(new ValueDescriptor(Values.VOLUME, "Volume", new String[] {}));
+        desc.exportValue(new ValueDescriptor(Values.TOTAL, "Total Volume", new String[] {}));
+        desc.exportValue(new ValueDescriptor(Values.VOLUME, "Volume Delta", new String[] {}));
         desc.exportValue(new ValueDescriptor(Values.VMA, "VMA", new String[] { Inputs.METHOD, Inputs.PERIOD }));
+        desc.declarePath(Values.TOTAL, "totalBar");
         desc.declarePath(Values.VOLUME, Inputs.BAR);
         desc.declarePath(Values.VMA, Inputs.PATH);
-        desc.setRangeKeys(Values.VOLUME, Values.VMA);
+        desc.setRangeKeys(Values.TOTAL, Values.VOLUME, Values.VMA);
 
+        desc.declareIndicator(Values.TOTAL, TOTAL_IND);
         desc.declareIndicator(Values.VOLUME, VOLUME_IND);
         desc.declareIndicator(Values.VMA, VMA_IND);
-        desc.setMinTopValue(0);
-        desc.setFixedBottomValue(0);
-        desc.setBottomInsetPixels(0);
         desc.setMinTick(1.0);
         desc.setTopInsetPixels(20);
         desc.setBottomInsetPixels(20);
@@ -111,29 +142,112 @@ public class BuddhaVolDelta extends Study {
         path = getSettings().getPath(Inputs.PATH);
         period = getSettings().getInteger(Inputs.PERIOD, 21);
         method = getSettings().getMAMethod(Inputs.METHOD, Enums.MAMethod.SMA);
+        maxVolDelta = 1.0; // Reset max volume delta
     }
 
     @Override
     /* === CALCULATE === */
     protected void calculate(int index, DataContext ctx) {
         var series = ctx.getDataSeries();
-        float vol = series.getVolumeAsFloat(index);
 
-        // Calculate volume delta: positive when close >= open (buying), negative when close < open (selling)
-        // Display as absolute value but color based on bar direction (PRICE_BAR color policy)
+        double high = series.getHigh(index);
+        double low = series.getLow(index);
         double close = series.getClose(index);
         double open = series.getOpen(index);
-        float volDelta = (close >= open) ? vol : -vol;
+        float vol = series.getVolumeAsFloat(index);
 
-        // Store absolute value so all bars display upward, but PRICE_BAR coloring maintains green/red/gray
-        series.setFloat(index, Values.VOLUME, Math.abs(volDelta));
+        // Calculate Money Flow Multiplier (MFM)
+        // MFM = ((close - low) - (high - close)) / (high - low)
+        // This weights volume based on where close is in the range:
+        // - Close near high (buying) = MFM near +1
+        // - Close near low (selling) = MFM near -1
+        // - Close in middle = MFM near 0
+        double mfm;
+        double range = high - low;
+
+        if (range > 0.0) {
+            // Standard Money Flow Multiplier calculation
+            mfm = ((close - low) - (high - close)) / range;
+        } else {
+            // Handle doji/single-price bars based on direction
+            mfm = (close >= open) ? 1.0 : -1.0;
+        }
+
+        // Calculate weighted volume delta using Money Flow Multiplier
+        double volDelta = mfm * vol;
+
+        // Split into buy and sell volume
+        double buyVol = volDelta >= 0 ? volDelta : 0;
+        double sellVol = volDelta < 0 ? -volDelta : 0;
+
+        // Update max volume for gradient scaling
+        if (vol > maxVolDelta) {
+            maxVolDelta = vol;
+        } else if (index > 100) {
+            // Gradually decay max to adapt to changing market conditions
+            maxVolDelta *= 0.9999;
+        }
+
+        // Background: Total volume with gradient color based on delta
+        Color gradientColor = calculateGradientColor(volDelta, vol);
+        series.setDouble(index, Values.TOTAL, (double) vol);
+        series.setBarColor(index, Values.TOTAL, gradientColor);
+
+        // Foreground: Buy or sell volume with solid colors
+        Color solidColor;
+        double deltaAmount;
+        if (volDelta >= 0) {
+            // Buying pressure - show buy volume in green
+            deltaAmount = buyVol;
+            solidColor = C_GREEN;
+        } else {
+            // Selling pressure - show sell volume in red
+            deltaAmount = sellVol;
+            solidColor = C_RED;
+        }
+        series.setDouble(index, Values.VOLUME, deltaAmount);
+        series.setBarColor(index, Values.VOLUME, solidColor);
+
+        // Calculate moving average of volume delta
         if (path != null && path.isEnabled() && index >= period) {
             series.setDouble(index, Values.VMA, series.ma(method, index, period, Values.VOLUME));
         }
+
         series.setComplete(index);
+    }
+
+    /**
+     * Calculate gradient color based on volume delta strength.
+     * Matches TradingView's color.from_gradient behavior
+     * Positive delta: gray -> lime
+     * Negative delta: red -> gray
+     */
+    private Color calculateGradientColor(double volDelta, double totalVol) {
+        double vmax = Math.max(totalVol, 1e-10);
+
+        if (volDelta >= 0) {
+            // Positive delta: gradient from gray to lime
+            float ratio = (float) Math.min(1.0, volDelta / vmax);
+            return interpolateColor(C_GRAY, C_LIME, ratio);
+        } else {
+            // Negative delta: gradient from red to gray
+            float ratio = (float) Math.min(1.0, -volDelta / vmax);
+            return interpolateColor(C_GRAY, C_DARK_RED, ratio);
+        }
+    }
+
+    /**
+     * Interpolate between two colors.
+     */
+    private Color interpolateColor(Color c1, Color c2, float ratio) {
+        int r = (int) (c1.getRed() + (c2.getRed() - c1.getRed()) * ratio);
+        int g = (int) (c1.getGreen() + (c2.getGreen() - c1.getGreen()) * ratio);
+        int b = (int) (c1.getBlue() + (c2.getBlue() - c1.getBlue()) * ratio);
+        return new Color(r, g, b);
     }
 
     private int period;
     private Enums.MAMethod method;
     private PathInfo path;
+    private double maxVolDelta = 1.0; // Track maximum volume delta for gradient scaling
 }

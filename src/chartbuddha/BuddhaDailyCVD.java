@@ -28,8 +28,9 @@ import java.awt.Font;
     desc = "Daily Cumulative Volume Delta with session reset",
     menu = "Chart Buddha",
     overlay = false,
+    studyOverlay = true,
     requiresVolume = true,
-    requiresBarUpdates = true
+    barUpdatesByDefault = true
 )
 public class BuddhaDailyCVD extends Study {
 
@@ -75,7 +76,7 @@ public class BuddhaDailyCVD extends Study {
             Enums.ColorPolicy.POSITIVE_NEGATIVE, // Color Policy
             0.0, // Reference value for color policy
             Enums.ShadeType.NONE, // Shade Type
-            5.0f, // Line Width
+            1.0f, // Line Width
             null, // Point Size (null = use default)
             0, // Bar Shift
             true, // Show Path (Line)
@@ -104,7 +105,7 @@ public class BuddhaDailyCVD extends Study {
             true, // Bool - Show On Top
             true, // Bool - Show Label
             Color.WHITE, // Color - Line
-            5.0f, // Float - Line Width
+            1.0f, // Float - Line Width
             null, // Float - Line Dash
             true, // Bool - Show Line
             true, // Bool - Show Tag
