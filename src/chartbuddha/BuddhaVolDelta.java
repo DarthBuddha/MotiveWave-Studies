@@ -19,8 +19,8 @@ import java.awt.Color;
 /**
  * Volume Delta indicator with Money Flow Multiplier weighting.
  * Calculates volume delta by weighting volume based on where the close
- * is within the high-low range. Includes cumulative volume delta (CVD)
- * and moving average of volume delta.
+ * is within the high-low range. Includes moving average and optional
+ * consolidation accumulation detection for spotting institutional activity.
  */
 @StudyHeader(
     namespace = "com.chartbuddha",
@@ -42,11 +42,14 @@ public class BuddhaVolDelta extends Study {
     }
 
     // === COLOR PALETTE === //
-    private static final Color C_LIME = new Color(0, 255, 0, 255); // Lime (strong buy)
-    private static final Color C_GREEN = new Color(0, 128, 0, 255); // Green (buy)
+    // Lighter, more pastel colors for gradient background
+    private static final Color C_LIGHT_GREEN = new Color(144, 238, 144, 255); // Light green (strong buy gradient)
+    private static final Color C_LIGHT_PINK = new Color(255, 182, 193, 255); // Light pink (strong sell gradient)
+
+    // Solid foreground colors (darker for contrast)
+    private static final Color C_GREEN = new Color(0, 128, 0, 255); // Green (buy foreground)
+    private static final Color C_RED = new Color(128, 0, 0, 255); // Red (sell foreground)
     private static final Color C_GRAY = new Color(120, 120, 120, 255); // Gray (neutral)
-    private static final Color C_RED = new Color(128, 0, 0, 255); // Red (sell)
-    private static final Color C_DARK_RED = new Color(255, 0, 0, 255); // Dark Red (strong sell)
 
     // === INPUT === //
     private static final String VOLUME_IND = "volumeInd";
@@ -218,21 +221,21 @@ public class BuddhaVolDelta extends Study {
 
     /**
      * Calculate gradient color based on volume delta strength.
-     * Matches TradingView's color.from_gradient behavior
-     * Positive delta: gray -> lime
-     * Negative delta: red -> gray
+     * Matches TradingView's color.from_gradient behavior with lighter pastel colors
+     * Positive delta: gray -> light green
+     * Negative delta: light pink -> gray
      */
     private Color calculateGradientColor(double volDelta, double totalVol) {
         double vmax = Math.max(totalVol, 1e-10);
 
         if (volDelta >= 0) {
-            // Positive delta: gradient from gray to lime
+            // Positive delta: gradient from gray to light green (pastel)
             float ratio = (float) Math.min(1.0, volDelta / vmax);
-            return interpolateColor(C_GRAY, C_LIME, ratio);
+            return interpolateColor(C_GRAY, C_LIGHT_GREEN, ratio);
         } else {
-            // Negative delta: gradient from red to gray
+            // Negative delta: gradient from light pink to gray (pastel)
             float ratio = (float) Math.min(1.0, -volDelta / vmax);
-            return interpolateColor(C_GRAY, C_DARK_RED, ratio);
+            return interpolateColor(C_GRAY, C_LIGHT_PINK, ratio);
         }
     }
 
