@@ -24,16 +24,16 @@ import java.awt.Color;
  */
 @StudyHeader(
     namespace = "com.chartbuddha",
-    id = "BUDDHA_VOL_DELTA",
-    name = "Buddha Volume Delta",
-    label = "Vol Delta",
-    desc = "Volume Delta",
+    id = "BUDDHA_MONEY_FLOW",
+    name = "Buddha Money Flow",
+    label = "Money Flow",
+    desc = "Money Flow Volume Delta Shows inferred accumulation/distribution by weighting volume based on price action within the bar.",
     menu = "Chart Buddha",
     overlay = false,
     requiresVolume = true,
     requiresBarUpdates = true
 )
-public class BuddhaVolDelta extends Study {
+public class BuddhaMoneyFlow extends Study {
 
     enum Values {
         VOLUME, // Buy/Sell volume (foreground)

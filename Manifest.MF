@@ -8,3 +8,4 @@ MW-Study: chartbuddha.BuddhaSqueeze
  chartbuddha.BuddhaVolDelta 
  chartbuddha.BuddhaDailyCVD 
  chartbuddha.BuddhaKeyLevels 
+ chartbuddha.BuddhaPosition 
